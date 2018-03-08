@@ -10,7 +10,7 @@ root@pc# ./install.sh
 ```bash
 user@pc$ shellpop --list
 ```
-![Image1](img/photo2.JPG)
+![Image1](img/photo3.JPG)
 
 
 ## Generate code for RCE vulnerabilities
