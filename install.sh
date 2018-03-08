@@ -6,4 +6,4 @@ fi
 if [ ! -d /opt/shellpop ]; then
     mkdir /opt/shellpop;
 fi
-cp shellpop /opt/shellpop; chmod +x /opt/shellpop/shellpop; ln -s /opt/shellpop/shellpop /usr/local/bin/shellpop
+cp *.py shellpop /opt/shellpop; chmod +x /opt/shellpop/shellpop; ln -s /opt/shellpop/shellpop /usr/local/bin/shellpop
