@@ -10,7 +10,7 @@ root@pc# ./install.sh
 ```bash
 user@pc$ shellpop --list
 ```
-![Image1](img/photo1.jpg)
+![Image1](img/photo2.JPG)
 
 
 ## Generate code for RCE vulnerabilities
@@ -22,7 +22,7 @@ user@pc$ shellpop --number 1 --bind --port 3333
 
 
 ## More examples
-![Image2](img/photo2.JPG)
+![Image2](img/photo1.jpg)
 
 ## Credits
 
