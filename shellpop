@@ -1,0 +1,159 @@
+#!/usr/bin/env python
+# ShellPop is program to aid penetration testers
+# generating quick and dirty reverse/bind shell 
+# code to get on with the pentests.
+# ==========
+# Written by zc00l in 2018-03-7
+
+import urllib
+from bind import *
+from reverse import *
+from sys import exit
+from argparse import ArgumentParser
+
+
+AVAILABLE_SHELLS = [
+        
+        # Bind shell list
+        {
+            1:("Bind - Python TCP", BIND_PYTHON_TCP),
+            2:("Bind - Perl TCP", BIND_PERL_TCP), 
+            3:("Bind - PHP TCP", BIND_PHP_TCP),
+            4:("Bind - Ruby TCP", BIND_RUBY_TCP),
+            5:("Bind - Netcat TCP", BIND_NETCAT_TCP),
+            },
+
+        # Reverse shell list
+        {
+            1: ("Reverse - Python TCP", REV_PYTHON_TCP),
+            2: ("Reverse - Python UDP", REV_PYTHON_UDP),
+            3: ("Reverse - PHP TCP", REV_PHP_TCP),
+            4: ("Reverse - Ruby TCP", REV_RUBY_TCP),
+            5: ("Reverse - Perl TCP 01", REV_PERL_TCP),
+            6: ("Reverse - Perl TCP 02", REV_PERL_TCP_2),
+            7: ("Reverse - Bash TCP", BASH_TCP),
+            }
+        ]
+
+bind_shells = AVAILABLE_SHELLS[0]
+reverse_shells = AVAILABLE_SHELLS[1]
+    
+
+class ReverseShell(object):
+    def __init__(self, name, host, port, code):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.code = code
+
+    def get(self):
+        return str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
+
+class BindShell(object):
+    def __init__(self, name, port, code):
+        self.name = name
+        self.port = port
+        self.code = code
+
+    def get(self):
+        return self.code.replace("PORT", str(self.port))
+
+
+def list_shells():
+    bind_shells = AVAILABLE_SHELLS[0]
+    reverse_shells = AVAILABLE_SHELLS[1]
+    
+    print " ==x== Bind shells ==x== "
+    for i in range(1, len(bind_shells)+1):
+        obj = bind_shells[i]
+        print("{0}. {1}".format(hex(i), obj[0]))
+
+    print "\n\n ==x== Reverse shells ==x== "
+    for i in range(1, len(reverse_shells)+1):
+        obj = reverse_shells[i]
+        print("{0}. {1}".format(hex(i), obj[0]))
+
+    return 0
+
+
+def header():
+    print "shellpop -- v. Alpha"
+    return 0
+
+def select_shell(args, shell_type, shell_index):
+    if shell_type == "reverse":
+        for shell in reverse_shells:
+            obj = reverse_shells[shell]
+            if shell == shell_index:
+                code = obj[1]
+                name = obj[0]
+                rev = ReverseShell(name, args.host, args.port, code)
+                generated = rev.get()
+                if args.base64 is True:
+                    generated = generated.encode("base64").replace("\n", "")
+                if args.urlencode is True:
+                    generated = urllib.quote(generated)
+                return generated
+
+    elif shell_type == "bind":
+        for shell in bind_shells:
+            obj = bind_shells[shell]
+            if shell == shell_index:
+                code = obj[1]
+                name = obj[0]
+                bind = BindShell(name, args.port, code)
+                generated = bind.get()
+                if args.base64 is True:
+                    generated = generated.encode("base64").replace("\n", "")
+                if args.urlencode is True:
+                    generated = urllib.quote(generated)
+                return generated
+
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("--list", help="List of available shells", action="store_true")
+    parser.add_argument("--base64", action="store_true", required=False, help="Encode command in base64.")
+    parser.add_argument("--urlencode", action="store_true", required=False, help="Encode the command in URL encoding.")
+    parser.add_argument("--host", type=str, help="IP to be used in connectback (reverse) shells.")
+    parser.add_argument("--port", type=int, help="Port to be used in reverse/bind shell code.")
+    parser.add_argument("--number", type=int, help="Shell code index number", required=False)
+    parser.add_argument("--reverse", action="store_true")
+    parser.add_argument("--bind", action="store_true")
+
+    args = parser.parse_args()
+    if args.list == True:
+        list_shells()
+        exit(0)
+
+    if type(args.number) is not int:
+        print("Error: You need to select a shell using --number. To list shells, use: --list")
+        exit(1)
+
+    if args.reverse is True and args.bind is True:
+        print("Error: You must select --reverse or --bind")
+        exit(1)
+
+    if args.reverse is not True and args.bind is not True:
+        print("Error: You can't select both --reverse and --bind options.")
+        exit(1)
+
+    if args.reverse is True:
+        if args.host is None:
+            print("Error: You need to set the listener IP address with --host")
+            exit(1)
+        if args.port is None:
+            print("Error: You need to set the listener port number with --port")
+            exit(1)
+        print(select_shell(args, "reverse", args.number))
+    else:
+        if args.port is None:
+            print("Error: You need to set the remote port number to listen with --port")
+            exit(1)
+        print(select_shell(args, "bind", args.number))
+
+    return 0x0
+
+if __name__ == "__main__":
+    main()
+
