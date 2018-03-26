@@ -104,7 +104,7 @@ def select_shell(args, shell_type, shell_index):
                 
                 if args.base64 is True:
                     if "powershell" not in name.lower():
-                        generated = generated.encode("base64").replace("\n", "")
+                        generated = "echo " + generated.encode("base64").replace("\n", "") + "|base64 -d|bash"
                     else:
                         # Powershell encoding code
                         prefix, code = generated.split("-Command")
