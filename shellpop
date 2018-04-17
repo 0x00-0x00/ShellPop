@@ -17,11 +17,12 @@ AVAILABLE_SHELLS = [
         # Bind shell list
         {
             1:("Bind - Python TCP", BIND_PYTHON_TCP),
-            2:("Bind - Perl TCP", BIND_PERL_TCP), 
-            3:("Bind - PHP TCP", BIND_PHP_TCP),
-            4:("Bind - Ruby TCP", BIND_RUBY_TCP),
-            5:("Bind - Netcat TCP", BIND_NETCAT_TCP),
-            6:("Bind - Powershell TCP", BIND_POWERSHELL_TCP),
+            2:("Bind - Python UDP", BIND_PYTHON_UDP),
+            3:("Bind - Perl TCP", BIND_PERL_TCP), 
+            4:("Bind - PHP TCP", BIND_PHP_TCP),
+            5:("Bind - Ruby TCP", BIND_RUBY_TCP),
+            6:("Bind - Netcat TCP", BIND_NETCAT_TCP),
+            7:("Bind - Powershell TCP", BIND_POWERSHELL_TCP),
             },
 
         # Reverse shell list
