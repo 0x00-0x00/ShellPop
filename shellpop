@@ -49,7 +49,7 @@ AVAILABLE_SHELLS = [
             4: ("Ruby TCP", REV_RUBY_TCP),
             5: ("Perl TCP 01", REV_PERL_TCP),
             6: ("Perl TCP 02", REV_PERL_TCP_2),
-            7: ("Perl UDP", REV_PERL_UDP),
+            7: ("Perl UDP [nc -lkvup PORT]", REV_PERL_UDP),
             8: ("Bash TCP", BASH_TCP),
             9: ("Powershell TCP", REV_POWERSHELL_TCP),
             10: ("TCLsh TCP", REVERSE_TCLSH),
