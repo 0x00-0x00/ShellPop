@@ -32,8 +32,9 @@ AVAILABLE_SHELLS = [
             3:("Perl TCP", BIND_PERL_TCP), 
             4:("PHP TCP", BIND_PHP_TCP),
             5:("Ruby TCP", BIND_RUBY_TCP),
-            6:("Netcat TCP", BIND_NETCAT_TCP),
-            7:("Powershell TCP", BIND_POWERSHELL_TCP),
+            6:("Netcat (OpenBSD) TCP", BIND_NETCAT_TCP),
+            7:("Netcat (Traditional) TCP", BIND_NETCAT_TRADITIONAL_TCP),
+            8:("Powershell TCP", BIND_POWERSHELL_TCP),
             },
 
         # Reverse shell list
