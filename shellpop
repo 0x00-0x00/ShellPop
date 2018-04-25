@@ -35,6 +35,15 @@ AVAILABLE_SHELLS = [
             6: ("Reverse - Perl TCP 02", REV_PERL_TCP_2),
             7: ("Reverse - Bash TCP", BASH_TCP),
             8: ("Reverse - Powershell TCP", REV_POWERSHELL_TCP),
+            9: ("Reverse - TCLsh TCP", REVERSE_TCLSH),
+            10: ("Reverse - ncat TCP", REVERSE_NCAT),
+            11: ("Reverse - nc traditional TCP", REVERSE_NC_TRADITIONAL_1),
+            12: ("Reverse - nc mkfifo TCP", REVERSE_MKFIFO_NC),
+            13: ("Reverse - nc mknod TCP", REVERSE_MKNOD_NC),
+            14: ("Reverse - telnet mkfifo TCP", REVERSE_MKFIFO_TELNET),
+            15: ("Reverse - telnet mknod TCP", REVERSE_MKNOD_TELNET),
+            16: ("Reverse - socat TCP", REVERSE_SOCAT),
+            17: ("Reverse - awk TCP", REVERSE_AWK),
             }
         ]
 

