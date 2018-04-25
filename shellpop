@@ -10,40 +10,51 @@ from bind import *
 from reverse import *
 from sys import exit
 from argparse import ArgumentParser
+from sys import stderr
+
+write=stderr.write
+flush=stderr.flush
+version = 0.2 # updated 25/04/2018
+
+def info(msg):
+    return "[\033[094m+\033[0m] {0}".format(msg)
+
+def error(msg):
+    return "[\033[091m!\033[0m] {0}".format(msg)
 
 
 AVAILABLE_SHELLS = [
         
         # Bind shell list
         {
-            1:("Bind - Python TCP", BIND_PYTHON_TCP),
-            2:("Bind - Python UDP", BIND_PYTHON_UDP),
-            3:("Bind - Perl TCP", BIND_PERL_TCP), 
-            4:("Bind - PHP TCP", BIND_PHP_TCP),
-            5:("Bind - Ruby TCP", BIND_RUBY_TCP),
-            6:("Bind - Netcat TCP", BIND_NETCAT_TCP),
-            7:("Bind - Powershell TCP", BIND_POWERSHELL_TCP),
+            1:("Python TCP", BIND_PYTHON_TCP),
+            2:("Python UDP", BIND_PYTHON_UDP),
+            3:("Perl TCP", BIND_PERL_TCP), 
+            4:("PHP TCP", BIND_PHP_TCP),
+            5:("Ruby TCP", BIND_RUBY_TCP),
+            6:("Netcat TCP", BIND_NETCAT_TCP),
+            7:("Powershell TCP", BIND_POWERSHELL_TCP),
             },
 
         # Reverse shell list
         {
-            1: ("Reverse - Python TCP", REV_PYTHON_TCP),
-            2: ("Reverse - Python UDP", REV_PYTHON_UDP),
-            3: ("Reverse - PHP TCP", REV_PHP_TCP),
-            4: ("Reverse - Ruby TCP", REV_RUBY_TCP),
-            5: ("Reverse - Perl TCP 01", REV_PERL_TCP),
-            6: ("Reverse - Perl TCP 02", REV_PERL_TCP_2),
-            7: ("Reverse - Bash TCP", BASH_TCP),
-            8: ("Reverse - Powershell TCP", REV_POWERSHELL_TCP),
-            9: ("Reverse - TCLsh TCP", REVERSE_TCLSH),
-            10: ("Reverse - ncat TCP", REVERSE_NCAT),
-            11: ("Reverse - nc traditional TCP", REVERSE_NC_TRADITIONAL_1),
-            12: ("Reverse - nc mkfifo TCP", REVERSE_MKFIFO_NC),
-            13: ("Reverse - nc mknod TCP", REVERSE_MKNOD_NC),
-            14: ("Reverse - telnet mkfifo TCP", REVERSE_MKFIFO_TELNET),
-            15: ("Reverse - telnet mknod TCP", REVERSE_MKNOD_TELNET),
-            16: ("Reverse - socat TCP", REVERSE_SOCAT),
-            17: ("Reverse - awk TCP", REVERSE_AWK),
+            1: ("Python TCP", REV_PYTHON_TCP),
+            2: ("Python UDP", REV_PYTHON_UDP),
+            3: ("PHP TCP", REV_PHP_TCP),
+            4: ("Ruby TCP", REV_RUBY_TCP),
+            5: ("Perl TCP 01", REV_PERL_TCP),
+            6: ("Perl TCP 02", REV_PERL_TCP_2),
+            7: ("Bash TCP", BASH_TCP),
+            8: ("Powershell TCP", REV_POWERSHELL_TCP),
+            9: ("TCLsh TCP", REVERSE_TCLSH),
+            10: ("ncat TCP", REVERSE_NCAT),
+            11: ("nc traditional TCP", REVERSE_NC_TRADITIONAL_1),
+            12: ("nc mkfifo TCP", REVERSE_MKFIFO_NC),
+            13: ("nc mknod TCP", REVERSE_MKNOD_NC),
+            14: ("telnet mkfifo TCP", REVERSE_MKFIFO_TELNET),
+            15: ("telnet mknod TCP", REVERSE_MKNOD_TELNET),
+            16: ("socat TCP", REVERSE_SOCAT),
+            17: ("awk TCP", REVERSE_AWK),
             }
         ]
 
@@ -70,27 +81,39 @@ class BindShell(object):
     def get(self):
         return self.code.replace("PORT", str(self.port))
 
+def proto_colorize(shell_name):
+    """
+    This code is responsible to colorize
+    the protocol of bind/reverse shells name.
+    """
+    proto_avail = [
+            ("UDP", "94"), 
+            ("TCP", "93")] # available protocols to colorize.
+    for proto in proto_avail:
+        if proto[0] in shell_name:
+            shell_name = shell_name.replace(proto[0], "\033[{0}m{1}\033[0m".format(proto[1], proto[0]))
+    return shell_name
 
 def list_shells():
     bind_shells = AVAILABLE_SHELLS[0]
     reverse_shells = AVAILABLE_SHELLS[1]
     
-    print " ==x== Bind shells ==x== "
+    write(info("\033[1mBind shells\033[0m:\n\n"))
     for i in range(1, len(bind_shells)+1):
         obj = bind_shells[i]
-        print("{0}. {1}".format(hex(i), obj[0]))
-
-    print "\n\n ==x== Reverse shells ==x== "
+        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj[0])))
+    
+    write("\n\n")
+    write(info("\033[1mReverse shells\033[0m:\n\n"))
     for i in range(1, len(reverse_shells)+1):
         obj = reverse_shells[i]
-        print("{0}. {1}".format(hex(i), obj[0]))
+        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj[0])))
 
     return 0
 
 
 def header():
-    print "shellpop -- v. Alpha"
-    return 0
+    return "\033[093mshellpop\033[0m v{0}\n\n".format(version)
 
 
 def powershell_base64(data):
@@ -165,32 +188,36 @@ def main():
 
     args = parser.parse_args()
     if args.list == True:
+        write(header())
         list_shells()
         exit(0)
 
     if type(args.number) is not int:
-        print("Error: You need to select a shell using --number. To list shells, use: --list")
+        write(header())
+        print(error("Error: You need to select a shell using --number. To list shells, use: --list"))
         exit(1)
 
     if args.reverse is True and args.bind is True:
-        print("Error: You must select --reverse or --bind")
+        write(header())
+        print(error("Error: You must select --reverse or --bind"))
         exit(1)
 
     if args.reverse is not True and args.bind is not True:
-        print("Error: You can't select both --reverse and --bind options.")
+        write(header())
+        print(error("Error: You can't select both --reverse and --bind options."))
         exit(1)
 
     if args.reverse is True:
         if args.host is None:
-            print("Error: You need to set the listener IP address with --host")
+            print(error("Error: You need to set the listener IP address with --host"))
             exit(1)
         if args.port is None:
-            print("Error: You need to set the listener port number with --port")
+            print(error("Error: You need to set the listener port number with --port"))
             exit(1)
         print(select_shell(args, "reverse", args.number))
     else:
         if args.port is None:
-            print("Error: You need to set the remote port number to listen with --port")
+            print(error("Error: You need to set the remote port number to listen with --port"))
             exit(1)
         print(select_shell(args, "bind", args.number))
 
