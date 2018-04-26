@@ -48,10 +48,10 @@ Bind shells required, necessarily, only --port argument.
 
 
 ### Generating a Powershell bind shell over port 1337
-![Screenshot](img/photo13.jpg?raw=true)
+![Screenshot](img/photo13.JPG?raw=true)
 
 ### Generating a Powershell bind shell over port 1337 encoded in base64
-![Screenshot](img/photo14.jpg?raw=true)
+![Screenshot](img/photo14.JPG?raw=true)
 
 ### TCP is blocked but UDP is not? Let there be shells!
 ![Screenshot](img/photo15.jpg?raw=true)
