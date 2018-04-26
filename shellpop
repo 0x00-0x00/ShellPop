@@ -14,7 +14,7 @@ from sys import stderr
 
 write=stderr.write
 flush=stderr.flush
-version = 0.2 # updated 25/04/2018
+version = 0.3 # updated 26/04/2018
 
 def info(msg):
     return "[\033[094m+\033[0m] {0}".format(msg)
