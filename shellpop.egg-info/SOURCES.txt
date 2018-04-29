@@ -1,0 +1,13 @@
+README.md
+setup.py
+bin/shellpop
+shellpop.egg-info/PKG-INFO
+shellpop.egg-info/SOURCES.txt
+shellpop.egg-info/dependency_links.txt
+shellpop.egg-info/not-zip-safe
+shellpop.egg-info/top_level.txt
+src/__init__.py
+src/bind.py
+src/classes.py
+src/encoders.py
+src/reverse.py

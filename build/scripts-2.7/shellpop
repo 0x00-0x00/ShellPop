@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # Description:
 # ShellPop is program to aid penetration testers
 # generating quick and dirty reverse/bind shell 
