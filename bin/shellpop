@@ -44,7 +44,7 @@ def error(msg):
 
 write=stderr.write
 flush=stderr.flush
-version = 0.337 # updated 29/04/2018
+version = 0.338 # updated 29/04/2018
 
 
 AVAILABLE_SHELLS = [
