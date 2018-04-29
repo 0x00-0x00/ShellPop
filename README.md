@@ -3,7 +3,7 @@
 
 ## Installation
 ```bash
-root@pc# ./install.sh
+root@pc# python setup.py install
 ```
 
 ## List available code for shells
@@ -59,7 +59,8 @@ Bind shells required, necessarily, only --port argument.
 
 ## Credits
 
-This code is 100% authored by Andre Marques (@zc00l) and it is made open to public the moment it was released in his github. 
+This code is authored by Andre Marques (@zc00l) and this project's contributors and it is made open to public the moment it was released in his github. 
+
 
 Any misuse of this code does not makes the author responsible for the damage it could cause.
 

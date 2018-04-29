@@ -1,26 +1,50 @@
 #!/usr/bin/env python
+# Description:
 # ShellPop is program to aid penetration testers
 # generating quick and dirty reverse/bind shell 
 # code to get on with the pentests.
 # ==========
+# History:
 # Written by zc00l in 2018-03-7
 
+# Contributors
+# ===================================================
+# LowFuel contributed to the project in 27/04/2018
+#   Github: https://github.com/SouAquele
+# Touhid Shaik joined the project in 29/04/2018
+#   Github: https://github.com/touhidshaikh
+
+
 import urllib
-from bind import *
-from reverse import *
 from sys import exit
 from argparse import ArgumentParser
 from sys import stderr
 
-write=stderr.write
-flush=stderr.flush
-version = 0.3 # updated 26/04/2018
+# package import
+from shellpop import *
 
+
+# Get current Operational System
+os = OperationalSystem().OS
+
+# This works exclusively on Linux, so we adapt to work in Windows too!
 def info(msg):
-    return "[\033[094m+\033[0m] {0}".format(msg)
+    if os == "linux":
+        msg = "[\033[094m+\033[0m] {0}".format(msg)
+    else:
+        msg = "[+] {0}".format(msg)
+    return msg
 
 def error(msg):
-    return "[\033[091m!\033[0m] {0}".format(msg)
+    if os == "linux":
+        msg = "[\033[091m!\033[0m] {0}".format(msg)
+    else:
+        msg = "[!] {0}".format(msg)
+    return msg
+
+write=stderr.write
+flush=stderr.flush
+version = 0.337 # updated 29/04/2018
 
 
 AVAILABLE_SHELLS = [
@@ -39,7 +63,7 @@ AVAILABLE_SHELLS = [
             10:("Netcat+coproc (OpenBSD) UDP", BIND_NETCAT_OPENBSD_UDP),
             11:("Netcat (Traditional) TCP", BIND_NETCAT_TRADITIONAL_TCP),
             12:("Powershell TCP", BIND_POWERSHELL_TCP),
-            },
+        },
 
         # Reverse shell list
         {
@@ -61,32 +85,12 @@ AVAILABLE_SHELLS = [
             16: ("Telnet mknod TCP", REVERSE_MKNOD_TELNET),
             17: ("socat TCP", REVERSE_SOCAT),
             18: ("awk TCP", REVERSE_AWK),
-            }
-        ]
+        }
+    ]
 
 bind_shells = AVAILABLE_SHELLS[0]
 reverse_shells = AVAILABLE_SHELLS[1]
     
-
-class ReverseShell(object):
-    def __init__(self, name, host, port, code):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.code = code
-
-    def get(self):
-        return str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
-
-class BindShell(object):
-    def __init__(self, name, port, code):
-        self.name = name
-        self.port = port
-        self.code = code
-
-    def get(self):
-        return self.code.replace("PORT", str(self.port))
-
 def proto_colorize(shell_name):
     """
     This code is responsible to colorize
@@ -119,18 +123,8 @@ def list_shells():
 
 
 def header():
-    return "\033[093mshellpop\033[0m v{0}\n\n".format(version)
-
-
-def powershell_base64(data):
-    """
-    Encode something compatible for Powershell base64-encoding
-    @zc00l
-    """
-    out = ""
-    for char in data:
-        out += char + "\x00"
-    return out.encode("base64").replace("\n", "")
+    contributors = ["@zc00l", "@touhidshaik", "@lowfuel"]
+    return "\033[093mshellpop\033[0m v{0}\n\033[93mcontributors\033[0m: {1}\n\n".format(version, ','.join([x for x in contributors]))
 
 def select_shell(args, shell_type, shell_index):
     if shell_type == "reverse":
@@ -139,21 +133,8 @@ def select_shell(args, shell_type, shell_index):
             if shell == shell_index:
                 code = obj[1]
                 name = obj[0]
-                rev = ReverseShell(name, args.host, args.port, code)
+                rev = ReverseShell(name, args, code)
                 generated = rev.get()
-                
-                if args.base64 is True:
-                    if "powershell" not in name.lower():
-                        generated = "echo " + generated.encode("base64").replace("\n", "") + "|base64 -d|bash"
-                    else:
-                        # Powershell encoding code
-                        prefix, code = generated.split("-Command")
-                        pcode = code.replace("'", "") # Remove single quotes from -Command
-                        pcode = pcode.replace("\\", "") # remove string quotation
-                        generated = prefix + "-Encoded " + powershell_base64(pcode)
-
-                if args.urlencode is True:
-                    generated = urllib.quote(generated)
                 return generated
 
     elif shell_type == "bind":
@@ -162,22 +143,8 @@ def select_shell(args, shell_type, shell_index):
             if shell == shell_index:
                 code = obj[1]
                 name = obj[0]
-                bind = BindShell(name, args.port, code)
+                bind = BindShell(name, args, code)
                 generated = bind.get()
-
-                if args.base64 is True:
-                    if "powershell" not in name.lower():
-                        generated = "echo " + generated.encode("base64").replace("\n", "") + "|base64 -d|bash"
-                    else:
-                        # Powershell encoding code
-                        prefix, code = generated.split("-Command")
-                        pcode = code.replace("'", "") # Remove single quotes from -Command
-                        pcode = pcode.replace("\\", "") # remove string quotation
-                        generated = prefix + "-Encoded " + powershell_base64(pcode)
-
-
-                if args.urlencode is True:
-                    generated = urllib.quote(generated)
                 return generated
 
 
