@@ -13,12 +13,13 @@ root@kali# python setup.py install
 ```
 
 ## Module Index
-* [Help] (#help-section)
-* [List] (#shell-list)
-* [Basics] (#basics)
-* [Encoders] (#encoders)
-* [Protocols] (#protocols)
-* [Credits] (#credits)
+* [Help](#help-section)
+* [List](#shell-list)
+* [Basics](#basics)
+* [Encoders](#encoders)
+* [Protocols](#protocols)
+* [Credits](#credits)
+* [Contributors](#contributors)
 
 -----
 ### __Help Section__
@@ -56,7 +57,7 @@ There is two types of payloads in this program: Bind or Reverse.
 Reverse shells use your attacker machine to serve as the "server". In this type of payload, you need both --host and --port pointing back to your machine. A handler must be set.
 
 -----
-##### Bind shell
+##### 2. Bind shell
 Bind shells use the remote host to serve the connection. In this type of payload, all you need is the --port option with a valid port number.
 
 
@@ -73,16 +74,17 @@ Encoders are special options that you can use while generating shellpop payloads
 
 There are, currently, three encoding methods that can be applied singularly, or concurrently, and they are:
 
-1. XOR encoding
+1. *XOR encoding*
 
- Uses a random numeric key (1-255) to obfuscate the payload and add a decryption stub to decrypt it.
+ __Uses a random numeric key (1-255) to obfuscate the payload and add a decryption stub to decrypt it.__
 
-2. Base64 encoding
- Simple base64 encoding in payload data and add a decryption stub to decrypt it.
+2. *Base64 encoding*
 
-3. URL encoding
+ __Simple base64 encoding in payload data and add a decryption stub to decrypt it.__
 
- Simple URL encode over the final payload.
+3. *URL encoding*
+
+ __Simple URL encode over the final payload.__
 
 
 #### *Command line examples*
@@ -104,6 +106,7 @@ There are, currently, three encoding methods that can be applied singularly, or 
 #### Generating a Python TCP reverse shell to IP 1.2.3.4 at port 443 using ALL methods of encoding!
 ![Screenshot](img/encoding-all-example.JPG?raw=true)
 
+-----
 ### __Protocols__
 Currently there is support of two protocols to land your shells:
 
@@ -114,6 +117,7 @@ Currently there is support of two protocols to land your shells:
 ##### TCP is blocked but UDP is not? Let there be shell!
 ![Screenshot](img/photo15.jpg?raw=true)
 
+-----
 ### __Credits__
 
 This code is authored by Andre Marques (@zc00l) and this project's contributors.
@@ -123,7 +127,7 @@ It is made open to public the moment it was released in this github.
 Any damage caused by this tool don't make any contributor, including the author, of responsibility.
 
 -----
-Current contributors:
+### __Contributors__
 + zc00l
 + touhidshaikh
 + lowfuel
