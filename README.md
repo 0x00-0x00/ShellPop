@@ -101,7 +101,7 @@ There are, currently, three encoding methods that can be applied singularly, or 
 ![Screenshot](img/photo14.JPG?raw=true)
 
 #### Generating a Python TCP reverse shell to IP 1.2.3.4 at port 443 using --xor encoding.
-![Screenshot](img/xor-encoding-example.JPG?raw=true)
+![Screenshot](img/xor-encoding-example-01.JPG?raw=true)
 
 #### Generating a Python TCP reverse shell to IP 1.2.3.4 at port 443 using ALL methods of encoding!
 ![Screenshot](img/encoding-all-example.JPG?raw=true)
