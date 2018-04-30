@@ -1,6 +1,9 @@
 *.pyc
-shellpop.egg-info
+shellpop.egg-info/
+shellpop.egg-info/*
 build/
 build/*
 dist/
 dist/*
+test/
+test/*

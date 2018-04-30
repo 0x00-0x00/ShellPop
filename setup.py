@@ -26,7 +26,7 @@ else:
     pass
 
 setup(name='shellpop',
-      version='0.3.3.8',
+      version='0.3.3.9',
       description='Bind and Reverse shell code generator to aid Penetration Tester in their work.',
       url='https://github.com/0x00-0x00/ShellPop.git',
       author='zc00l, lowfuel, touhid_shaik',

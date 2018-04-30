@@ -19,6 +19,7 @@ import urllib
 from sys import exit
 from argparse import ArgumentParser
 from sys import stderr
+from random import randint
 
 # package import
 from shellpop import *
@@ -44,7 +45,7 @@ def error(msg):
 
 write=stderr.write
 flush=stderr.flush
-version = 0.338 # updated 29/04/2018
+version = 0.339 # updated 30/04/2018
 
 
 AVAILABLE_SHELLS = [
@@ -159,6 +160,7 @@ def main():
     parser.add_argument("--number", type=int, help="Shell code index number", required=False)
     parser.add_argument("--reverse", action="store_true")
     parser.add_argument("--bind", action="store_true")
+    parser.add_argument("--xor", action="store_true",help="Enable XOR obfuscation", required=False)
 
     args = parser.parse_args()
     if args.list == True:
@@ -180,6 +182,12 @@ def main():
         write(header())
         print(error("Error: You can't select both --reverse and --bind options."))
         exit(1)
+
+
+    if args.xor is True:
+        args.xor = randint(0,255)
+    else:
+        args.xor = 0 # no Xor encoding!
 
     if args.reverse is True:
         if args.host is None:

