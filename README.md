@@ -14,7 +14,7 @@ root@kali# python setup.py install
 
 ## Module Index
 * [Help](#help-section)
-* [List](#shell-list)
+* [List](#shells-list)
 * [Basics](#basics)
 * [Encoders](#encoders)
 * [Protocols](#protocols)
