@@ -13,11 +13,23 @@ root@kali# python setup.py install
 ```
 
 ## Module Index
+* [Help] (#help-section)
 * [List] (#shell-list)
 * [Basics] (#basics)
 * [Encoders] (#encoders)
 * [Protocols] (#protocols)
 * [Credits] (#credits)
+
+-----
+### __Help Section__
+To quickly list all available options of this tools, use --help.
+
+#### *Command line examples*
+```bash
+user@pc$ shellpop --help
+```
+
+![Screenshot](img/help-section.JPG?raw=true)
 
 
 -----
