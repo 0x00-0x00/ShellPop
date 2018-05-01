@@ -52,41 +52,41 @@ AVAILABLE_SHELLS = [
         
         # Bind shell list
         {
-            1:("Python TCP", BIND_PYTHON_TCP),
-            2:("Python UDP", BIND_PYTHON_UDP),
-            3:("Perl TCP", BIND_PERL_TCP),
-            4:("Perl UDP", BIND_PERL_UDP),
-            5:("PHP TCP", BIND_PHP_TCP),
-            6:("PHP UDP", BIND_PHP_UDP),
-            7:("Ruby TCP", BIND_RUBY_TCP),
-            8:("Ruby UDP", BIND_RUBY_UDP),
-            9:("Netcat (OpenBSD) TCP", BIND_NETCAT_TCP),
-            10:("Netcat+coproc (OpenBSD) UDP", BIND_NETCAT_OPENBSD_UDP),
-            11:("Netcat (Traditional) TCP", BIND_NETCAT_TRADITIONAL_TCP),
-            12:("Powershell TCP", BIND_POWERSHELL_TCP),
+            1:("Python TCP", BIND_PYTHON_TCP()),
+            2:("Python UDP", BIND_PYTHON_UDP()),
+            3:("Perl TCP", BIND_PERL_TCP()),
+            4:("Perl UDP", BIND_PERL_UDP()),
+            5:("PHP TCP", BIND_PHP_TCP()),
+            6:("PHP UDP", BIND_PHP_UDP()),
+            7:("Ruby TCP", BIND_RUBY_TCP()),
+            8:("Ruby UDP", BIND_RUBY_UDP()),
+            9:("Netcat (OpenBSD) TCP", BIND_NETCAT_TCP()),
+            10:("Netcat+coproc (OpenBSD) UDP", BIND_NETCAT_OPENBSD_UDP()),
+            11:("Netcat (Traditional) TCP", BIND_NETCAT_TRADITIONAL_TCP()),
+            12:("Powershell TCP", BIND_POWERSHELL_TCP()),
         },
 
         # Reverse shell list
         {
-            1: ("Python TCP", REV_PYTHON_TCP),
-            2: ("Python UDP", REV_PYTHON_UDP),
-            3: ("PHP TCP", REV_PHP_TCP),
-            4: ("Ruby TCP", REV_RUBY_TCP),
-            5: ("Perl TCP 01", REV_PERL_TCP),
-            6: ("Perl TCP 02", REV_PERL_TCP_2),
-            7: ("Perl UDP [nc -lkvup PORT]", REV_PERL_UDP),
-            8: ("Bash TCP", BASH_TCP),
-            9: ("Powershell TCP", REV_POWERSHELL_TCP),
-            10: ("TCLsh TCP", REVERSE_TCLSH),
-            11: ("Ncat TCP", REVERSE_NCAT),
-            12: ("Netcat (Traditional) UDP", REVERSE_NC_UDP_1),
-            13: ("Netcat (Traditional) TCP", REVERSE_NC_TRADITIONAL_1),
-            14: ("Netcat (OpenBSD) mkfifo TCP", REVERSE_MKFIFO_NC),
-            15: ("Netcat (OpenBSD) mknod TCP", REVERSE_MKNOD_NC),
-            16: ("Telnet mkfifo TCP", REVERSE_MKFIFO_TELNET),
-            17: ("Telnet mknod TCP", REVERSE_MKNOD_TELNET),
-            18: ("socat TCP", REVERSE_SOCAT),
-            19: ("awk TCP", REVERSE_AWK),
+            1: ("Python TCP", REV_PYTHON_TCP()),
+            2: ("Python UDP", REV_PYTHON_UDP()),
+            3: ("PHP TCP", REV_PHP_TCP()),
+            4: ("Ruby TCP", REV_RUBY_TCP()),
+            5: ("Perl TCP 01", REV_PERL_TCP()),
+            6: ("Perl TCP 02", REV_PERL_TCP_2()),
+            7: ("Perl UDP [nc -lkvup PORT]", REV_PERL_UDP()),
+            8: ("Bash TCP", BASH_TCP()),
+            9: ("Powershell TCP", REV_POWERSHELL_TCP()),
+            10: ("TCLsh TCP", REVERSE_TCLSH()),
+            11: ("Ncat TCP", REVERSE_NCAT()),
+            12: ("Netcat (Traditional) UDP", REVERSE_NC_UDP_1()),
+            13: ("Netcat (Traditional) TCP", REVERSE_NC_TRADITIONAL_1()),
+            14: ("Netcat (OpenBSD) mkfifo TCP", REVERSE_MKFIFO_NC()),
+            15: ("Netcat (OpenBSD) mknod TCP", REVERSE_MKNOD_NC()),
+            16: ("Telnet mkfifo TCP", REVERSE_MKFIFO_TELNET()),
+            17: ("Telnet mknod TCP", REVERSE_MKNOD_TELNET()),
+            18: ("socat TCP", REVERSE_SOCAT()),
+            19: ("awk TCP", REVERSE_AWK()),
         }
     ]
 
@@ -214,4 +214,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
