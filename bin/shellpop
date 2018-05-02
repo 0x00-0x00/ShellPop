@@ -321,6 +321,14 @@ AVAILABLE_SHELLS = [
                 arch="Independent",
                 use_handler=reverse_tcp_handler,
                 use_http_stager=LINUX_STAGERS),
+
+            20: Shell("awk UDP",
+                "reverse",
+                "udp",
+                REVERSE_AWK_UDP(),
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
         }
     ]
 
