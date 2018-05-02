@@ -110,7 +110,7 @@ class ReverseShell(object):
         self.code = base64_wrapper(self.name, self.code, self.args)
 
         # Apply URL-encoding
-        if self.args.urlencode is True and self.args.handler is None:
+        if self.args.urlencode is True and self.args.stager is None:
             self.code = to_urlencode(self.code)
         
         return self.code
