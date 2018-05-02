@@ -429,6 +429,9 @@ def main():
     # Http-staging options
     parser.add_argument("--http-port", type=int, help="HTTP staging port to be used", required=False)
 
+    # Send it to clipboard
+    parser.add_argument("--clip", action="store_true", help="Copy payload to your clipboard automatically.", required=False)
+
     args = parser.parse_args()
     if args.list == True:
         write(header())
@@ -525,7 +528,8 @@ def main():
    
     to_be_executed = shell.payload if stager is None else stager_payload
 
-    pyperclip.copy(to_be_executed)
+    if args.clip is True:
+        pyperclip.copy(to_be_executed)
     print(info("ShellPop code has been copied to clipboard."))
 
     print(info("Execute this code in remote target: \n\n{0}\n".format(to_be_executed)))
