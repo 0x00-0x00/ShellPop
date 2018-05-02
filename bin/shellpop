@@ -326,9 +326,19 @@ AVAILABLE_SHELLS = [
                 "reverse",
                 "udp",
                 REVERSE_AWK_UDP(),
+                os="Linux",
                 arch="Independent",
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
+            
+            21: Shell("Windows Ncat TCP",
+                "reverse",
+                "tcp",
+                REVERSE_WINDOWS_NCAT_TCP(),
+                os="Windows",
+                arch="x64",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=WINDOWS_STAGERS),
         }
     ]
 
