@@ -134,6 +134,7 @@ ShellPop has the following set of HTTP stagers to fit in any scenario you would 
 1. Linux Stagers (Python, Perl, Wget and cURL)
 2. Windows Stagers (Powershell and CertUtil)
 
+To use HTTP staging, append to your command line `--stager http` and, optionally, if you want to specify the HTTP server port, the `--http-port` flag will put your port number in front of the pre-defined ones.
 
 -----
 ### __Protocols__
