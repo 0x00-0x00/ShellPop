@@ -17,6 +17,8 @@ root@kali# python setup.py install
 * [List](#shells-list)
 * [Basics](#basics)
 * [Encoders](#encoders)
+* [Handlers](#handlers)
+* [Stagers](#stagers)
 * [Protocols](#protocols)
 * [Credits](#credits)
 * [Contributors](#contributors)
@@ -49,6 +51,9 @@ user@desktop$ shellpop --list
 
 ### __Basics__
 -----
+#### *Copying it to clipboard*
+Dont waste time. This tool is all about NOT wasting time. So you can use `--clip` option to all your generated payloads and get them automagically copied to your clipboard.
+
 #### *Shell Types*
 There is two types of payloads in this program: Bind or Reverse.
 
@@ -105,6 +110,30 @@ There are, currently, three encoding methods that can be applied singularly, or 
 
 #### Generating a Python TCP reverse shell to IP 1.2.3.4 at port 443 using ALL methods of encoding!
 ![Screenshot](img/encoding-all-example.JPG?raw=true)
+
+-----
+### __Handlers__
+Handler is a mechanism to "handle" the act of serving a socket to receive the incoming connection or to connect itself to a server endpoint in a way to establish your shell.
+
+Currently there is support of the following TCP handlers:
+1. TCP PTY Handlers
+2. TCP Handlers
+
+This means every TCP shell can have appended to their command-line argument the `--handler` option. Removing the necessity of the operator to spawn the handler (probably ncat or nc) by himself.
+
+-----
+### __Stagers__
+Stager is a mechanism of serving your payload in STAGES. Sometimes payload complexity or size can get troublesome. In such cases, you can craft a small payload which in turn can request and execute the bigger one.
+
+Currently there is support of the following Stagers protocols:
+1. HTTP
+
+
+#### HTTP Stagers
+ShellPop has the following set of HTTP stagers to fit in any scenario you would want:
+1. Linux Stagers (Python, Perl, Wget and cURL)
+2. Windows Stagers (Powershell and CertUtil)
+
 
 -----
 ### __Protocols__
