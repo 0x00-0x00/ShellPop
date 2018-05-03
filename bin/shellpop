@@ -465,10 +465,10 @@ def main():
     # Use handler if possible.
     parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", default=False, required=False)
 
-    #Stagging 
-    stagingarg = parser.add_argument_group("Stagging Options")
+    #Staging 
+    stagingarg = parser.add_argument_group("Staging Options")
     # Use staging
-    stagingarg.add_argument("--stager", type=str, help="Use HTTP staging for malicious shells", required=False)
+    stagingarg.add_argument("--stager", type=str, help="Use staging for shells", required=False)
     # Http-staging options
     stagingarg.add_argument("--http-port", type=int, help="HTTP staging port to be used", required=False)
 
