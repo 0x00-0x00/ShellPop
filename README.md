@@ -8,11 +8,16 @@
 
 -----
 ## Installation
+**Required Dependencies Install**
+```bash
+pip install -r requirements.txt
+```
+**Setup Install**
 ```bash
 root@kali# python setup.py install
 ```
 
-## Module Index
+## Index
 * [Help](#help-section)
 * [List](#shells-list)
 * [Basics](#basics)
@@ -158,6 +163,6 @@ Any damage caused by this tool don't make any contributor, including the author,
 
 -----
 ### __Contributors__
-+ zc00l
-+ touhidshaikh
-+ lowfuel
++ [zc00l](https://github.com/0x00-0x00)
++ [touhidshaikh](https://github.com/touhidshaikh)
++ [lowfuel](https://github.com/SouAquele)
