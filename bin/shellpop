@@ -357,6 +357,15 @@ AVAILABLE_SHELLS = [
                 arch="x64",
                 use_handler=reverse_tcp_handler,
                 use_http_stager=WINDOWS_STAGERS),
+
+            22: Shell("Windows Bloodseeker TCP",
+                "reverse",
+                "tcp",
+                REVERSE_WINDOWS_BLOODSEEKER_TCP(),
+                os="Windows",
+                arch="x64",
+                use_handler=None,
+                use_http_stager=[(1, Powershell_HTTP_Stager),]), # This will only work with powershell.
         }
     ]
 
@@ -555,7 +564,7 @@ def main():
 
                         # Choose the stager option
                         if len(shell.use_http_stager) == 1:
-                            shell.use_http_stager = shell.use_http_stager[0]
+                            shell.use_http_stager = shell.use_http_stager[0][1]
                         else:
                             shell.use_http_stager = choose_stager(shell.use_http_stager) # choose a stager.
 

