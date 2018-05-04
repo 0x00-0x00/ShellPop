@@ -37,7 +37,7 @@ To quickly list all available options of this tools, use --help.
 user@pc$ shellpop --help
 ```
 
-![Screenshot](img/help-section.JPG?raw=true)
+![Screenshot](img/help-section.png?raw=true)
 
 
 -----
