@@ -19,6 +19,7 @@ import urllib
 import pyperclip
 import os
 import string
+import netifaces
 from sys import exit
 from argparse import ArgumentParser
 from sys import stderr
@@ -509,6 +510,8 @@ def main():
         print(error("Error: You can't select both --reverse and --bind options."))
         exit(1)
 
+    if args.host in [str(x) for x in netifaces.interfaces()]:
+        args.host = str(netifaces.ifaddresses(args.host)[2][0]["addr"]) # translate iface name to ipv4
 
     if args.xor is True:
         args.xor = randint(0,255)
@@ -534,7 +537,6 @@ def main():
             if args.host is None:
                 args.host = raw_input("[\033[092m*\033[0m] Remote host IP address: ")
             shell.handler_args = (args.host, args.port)
-
 
     # This is the spot for stagers.
     # First, we need to detect if the operator
