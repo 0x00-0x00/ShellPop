@@ -28,6 +28,7 @@ root@kali# python setup.py install
 * [Stagers](#stagers)
 * [Protocols](#protocols)
 * [Credits](#credits)
+* [Team Members](#team-members)
 * [Contributors](#contributors)
 
 -----
@@ -168,7 +169,10 @@ It is made open to public the moment it was released in this github.
 Any damage caused by this tool don't make any contributor, including the author, of responsibility.
 
 -----
+### __Team Members__
++ Andre Marques[zc00l](https://github.com/0x00-0x00)
++ Touhid M.Shaikh[touhidshaikh](https://github.com/touhidshaikh)
++ Rοbеrt Εѕрі[lowfuel](https://github.com/SouAquele)
+-----
 ### __Contributors__
-+ [zc00l](https://github.com/0x00-0x00)
-+ [touhidshaikh](https://github.com/touhidshaikh)
-+ [lowfuel](https://github.com/SouAquele)
+We really appriciate all Contributors.
