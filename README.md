@@ -4,11 +4,13 @@
     Shell pop is all about popping shells. With this tool you can
     generate easy and sofisticated reverse or bind shell commands
     to help you during penetration tests.
-    Don't wast more time with .txt files storing your Reverse shells!
+    Don't waste more time with .txt files storing your Reverse shells!
 
 -----
 ## Installation
-Python 2.x is required. 3.0+ version will not work.
+Python 2.x is required. 
+
+3.0+ version will not work.
 
 **Required Dependencies Install**
 ```bash

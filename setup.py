@@ -1,29 +1,44 @@
 from setuptools import setup
 from setuptools.command.install import install
+from subprocess import Popen, PIPE
 import os
-import platform
-import shutil
 
+def applyChanges():
+    proc = Popen("source ~/.bashrc", stdout=PIPE, stderr=PIPE, shell=True)
+    _, _ = proc.communicate()
+    return None
 
-LINUX_SCRIPT_PATH = "/usr/local/bin/shellpop"
-WINDOWS_SCRIPT_PATH = "C:\\Users\\Public\\Program Files\\Shellpop\\shellpop"
+def activateTabComplete():
+    proc = Popen("activate-global-python-argcomplete", stdout=PIPE, stderr=PIPE, shell=True)
+    _, _ = proc.communicate()
+    return True if proc.poll() is 0 else False
 
-# Platform detection snippet added by Touhid Shaik
-if platform.system() == "Linux":
-    SCRIPTS = "bin/shellpop"
-elif platform.system() == "Windows":
-    
-    # This checks and ensures that script is installed, even if there are no folders.
-    if os.path.isdir("C:\\Users\\Public\\Program Files") is False:
-      os.mkdir("C:\\Users\\Public\\Program Files")
-    
-    if os.path.isdir("C:\\Users\\Public\\Program Files\\ShellPop") is False:
-      os.mkdir("C:\\Users\\Public\\Program Files\\ShellPop")
-      
-    shutil.copyfile("bin/shellpop", WINDOWS_SCRIPT_PATH)
-    SCRIPTS = WINDOWS_SCRIPT_PATH
-else:
-    pass
+def autoComplete():
+    """
+    Get the content required to register Shellpop into tab auto-completion
+    @zc00l
+    """
+    proc = Popen("register-python-argcomplete shellpop", stdout=PIPE, stderr=PIPE, shell=True)
+    stdout, _ = proc.communicate()
+    return stdout
+
+class CustomInstall(install):
+    def run(self):
+        install.run(self)
+        bashrc_file = os.environ["HOME"] + os.sep + ".bashrc"
+        if not os.path.exists(bashrc_file):
+            return None
+        with open(bashrc_file, "r") as f:
+            bashrc_content = f.read()
+        if "shellpop" not in bashrc_content:
+            print("Registering shellpop in .bashrc for auto-completion ...")
+            activateTabComplete() # this will enable auto-complete feature.
+
+            # This will write the configuration needed in .bashrc file
+            with open(bashrc_file, "a") as f:
+                f.write("\n{0}\n".format(autoComplete()))
+            print("Auto-completion has been installed.")
+            applyChanges()
 
 setup(name='shellpop',
       version='0.3.5',
@@ -44,4 +59,5 @@ setup(name='shellpop',
       #],
 
       scripts=["bin/shellpop"],
-      zip_safe=False)
+      zip_safe=False,
+      cmdclass={'install':CustomInstall})
