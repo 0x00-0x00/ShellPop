@@ -14,12 +14,17 @@ Python 2.x is required.
 
 **Required Dependencies Install**
 ```bash
+root@kali# apt-get install python-argcomplete -y
+```
+```bash
 root@kali# pip install -r requirements.txt
 ```
 **Setup Install**
 ```bash
 root@kali# python setup.py install
 ```
+
+**PS**: After installation, tab auto-complete will only work after restarting the terminal.
 
 ## Index
 * [Help](#help-section)
