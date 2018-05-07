@@ -6,12 +6,14 @@
 # The other classes, are.
 
 from shellpop import *
+from threading import Thread
 from time import sleep
 import termios
 import select
 import socket
 import os
 import fcntl
+import sys
 
 class PTY:
     def __init__(self, slave=0, pid=os.getpid()):
@@ -153,7 +155,23 @@ class TCP_Handler(object):
         self.conn_info = conn_info
         self.bind = bind
         self.sock = None
-
+    
+    @staticmethod
+    def read_and_loop(sock):
+        while True:
+            try:
+                data = sock.recv(1024)
+                if data and len(data) > 0:
+                    sys.stdout.write(data)
+            except socket.timeout:
+                sleep(1)
+            except KeyboardInterrupt:
+                sock.close()
+                return 0
+            except socket.error:
+                sock.close()
+                return 0
+            
     def handle(self):
         sock = None
         self.sock = socket.socket()
@@ -178,31 +196,25 @@ class TCP_Handler(object):
                 except socket.error:
                     print(error("Connection to remote endpoint could not be established."))
                     n+=1
-                    sleep(2.0)
+                    sleep(4.5)
         
         if sock is None: # we assume we have a connection by now.
             print(error("No connection socket to use."))
             exit(0)
         else:
             sock.settimeout(1.0)
-        try:
-            while 1:
-                output = "" 
-                while 1:
-                    try:
-                        data = sock.recv(1024)
-                    except socket.timeout:
-                        data = None
-                    if data:
-                        output += data
-                    else:
-                        break
-                print(output)
-                s = raw_input("")
-                sock.send(s+'\n')
-        except KeyboardInterrupt:
-            print(info("Interrupting handler ..."))
-            sock.close()
+        
+        t = Thread(target=self.read_and_loop, args=(sock,))
+        t.start() # start the read in loop.
+        while 1:
+            try:
+                s = raw_input("") # This is a block call.
+                sock.send(s+"\n")
+            except KeyboardInterrupt:
+                print(info("Interrupting handler ..."))
+                sock.close()
+                self.sock.close()
+        t.join()
 
 def reverse_tcp_handler(conn_info):
     handler = TCP_Handler(conn_info, bind=True)
