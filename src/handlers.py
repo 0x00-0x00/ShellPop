@@ -203,6 +203,7 @@ class TCP_Handler(object):
         except KeyboardInterrupt:
             print(info("Interrupting handler ..."))
             sock.close()
+            self.sock.close()
 
 def reverse_tcp_handler(conn_info):
     handler = TCP_Handler(conn_info, bind=True)

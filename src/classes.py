@@ -4,7 +4,15 @@ from binary import shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since
 from sys import exit
 import platform
 import os
+import string
 
+def generate_file_name(extension=""):
+    file_name = ""
+    while len(file_name) < 8:
+        random_char = os.urandom(1)
+        if random_char in string.letters:
+            file_name += random_char
+    return file_name + extension
 
 class OperationalSystem(object):
     def __init__(self):

