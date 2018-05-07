@@ -34,6 +34,13 @@ def error(msg):
     else:
         msg = "[!] {0}".format(msg)
     return msg
+
+def alert(msg):
+    if SysOS.OS == "linux":
+        msg = "[\033[093mALERT\033[0m] {0}".format(msg)
+    else:
+        msg = "[ALERT] {0}".format(msg)
+    return msg
 #=================
 
 def xor_wrapper(name, code, args, shell="/bin/bash"):
