@@ -386,9 +386,6 @@ def proto_colorize(shell_name):
     return shell_name
 
 def list_shells():
-    bind_shells = AVAILABLE_SHELLS[0]
-    reverse_shells = AVAILABLE_SHELLS[1]
-    
     write(info("\033[1mBind shells\033[0m:\n\n"))
     for i in range(1, len(bind_shells)+1):
         obj = bind_shells[i]
@@ -401,6 +398,19 @@ def list_shells():
         print("{0}. {1}".format(str(i).rjust(3), proto_colorize(obj.name)))
     return 0
 
+
+def check_shell_number(number, reverse=True):
+    """
+    Check if the number supplied is not too high.
+    @zc00l
+    """
+    if reverse is True:
+        if number > len(reverse_shells):
+            return None
+    else:
+        if number > len(bind_shells):
+            return None
+    return True
 
 def header():
     contributors = ["@zc00l", "@touhidshaikh", "@lowfuel"]
@@ -509,6 +519,9 @@ def main():
         args.xor = 0 # no Xor encoding!
 
     if args.reverse is True:
+        if not check_shell_number(args.number, reverse=True):
+            print(error("Error: Invalid reverse shell number."))
+            exit(1)
         if args.host is None:
             print(error("Error: You need to set the listener IP address with --host"))
             exit(1)
@@ -519,6 +532,9 @@ def main():
         if shell.handler is not None:
             shell.handler_args = ('0.0.0.0', args.port)
     else:
+        if not check_shell_number(args.number, reverse=False):
+            print(error("Invalid bind shell number."))
+            exit(1)
         if args.port is None:
             print(error("Error: You need to set the remote port number to listen with --port"))
             exit(1)
