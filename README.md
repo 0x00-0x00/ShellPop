@@ -170,9 +170,9 @@ Any damage caused by this tool don't make any contributor, including the author,
 
 -----
 ### __Team Members__
-+ Andre Marques[zc00l](https://github.com/0x00-0x00)
-+ Touhid M.Shaikh[touhidshaikh](https://github.com/touhidshaikh)
-+ Rοbеrt Εѕрі[lowfuel](https://github.com/SouAquele)
++ Andre Marques ([zc00l](https://github.com/0x00-0x00))
++ Touhid M.Shaikh ([touhidshaikh](https://github.com/touhidshaikh))
++ Rοbеrt Εѕрі ([lowfuel](https://github.com/SouAquele))
 -----
 ### __Contributors__
 We really appriciate all Contributors.
