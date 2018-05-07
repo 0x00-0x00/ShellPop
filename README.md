@@ -9,6 +9,7 @@
 -----
 ## Installation
 Python 2.x is required. 3.0+ version will not work.
+
 **Required Dependencies Install**
 ```bash
 root@kali# pip install -r requirements.txt
