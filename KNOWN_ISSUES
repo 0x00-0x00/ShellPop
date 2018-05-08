@@ -1,0 +1,2 @@
+1. Powershell payloads generated with --xor and --base64 alongside with --powershell-random-case will not work.
+1.1 Powershell payloads generated with --xor and --base64 still work. You just cant use --random-case in the case of --xor.

