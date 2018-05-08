@@ -395,7 +395,7 @@ AVAILABLE_SHELLS = [
                 use_http_stager=list(filter(lambda x: x[0] not in [1,3], WINDOWS_STAGERS )) ),
 
             22: Shell("Windows Powershell Shellcode-Injection a.k.a BloodSeeker TCP - x64",
-                "shellcode_injection_aka_bloodseeker",
+                "powershell_shellcode_injection",
                 "reverse",
                 "tcp",
                 REVERSE_WINDOWS_BLOODSEEKER_TCP(),
@@ -403,6 +403,16 @@ AVAILABLE_SHELLS = [
                 arch="x64",
                 use_handler=None,
                 use_http_stager=[(1, Powershell_HTTP_Stager),]), # This will only work with powershell.
+            
+            23: Shell("Windows Powershell Tiny TCP",
+                "powershell_tiny",
+                "reverse",
+                "tcp",
+                REVERSE_POWERSHELL_TINY_TCP(),
+                system="windows",
+                arch="x86 / x64",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=WINDOWS_STAGERS),
         }
     ]
 
@@ -514,7 +524,6 @@ def main():
     parser.add_argument("--number", type=int, help="Shell code index number", required=False)
     parser.add_argument("--shell", type=str, default="", help="Terminal shell to be used when decoding some encoding scheme.", required=False)
 
-
     # Shell Type
     payload_arg = parser.add_argument_group('Shell Types')
     payload_arg.add_argument("--reverse", action="store_true", help="Victim communicates back to the attacking machine.")
@@ -538,6 +547,12 @@ def main():
     stagingarg.add_argument("--stager", type=str, help="Use staging for shells", required=False)
     # Http-staging options
     stagingarg.add_argument("--http-port", type=int, help="HTTP staging port to be used", required=False)
+
+    # Powershell features
+    powershell_arg = parser.add_argument_group("PowerShell options")
+    powershell_arg.add_argument("--powershell-x86", action="store_true", help="Use powershell 32-bit executable.")
+    powershell_arg.add_argument("--powershell-x64", action="store_true", help="Use powershell 64-bit executable.")
+    powershell_arg.add_argument("--powershell-random-case", action="store_true", help="Use random-case in powershell payloads.")
 
     #Miscellaneous 
     miscarg = parser.add_argument_group("Miscellaneous")
