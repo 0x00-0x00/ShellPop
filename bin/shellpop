@@ -560,10 +560,12 @@ def main():
         if reverse_int:
             args.reverse = True # this sets --reverse
             args.number = reverse_int # this sets --number
-        
-        if bind_int:
+        elif bind_int:
             args.bind = True
             args.number = bind_int
+        else:
+            print(error("Error: Your --payload flag is invalid."))
+            exit(1)
         
     if type(args.number) is not int:
         write(header())
