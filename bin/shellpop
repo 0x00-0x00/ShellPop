@@ -521,7 +521,7 @@ def main():
     payload_arg.add_argument("--bind", action="store_true",help="Open up a listener on the victim machine.")
     
     # Alternative way to select shell payloads, using auto-tab completion.
-    payload_arg.add_argument("-p", "--payload", required=False, help="Choose the payload").completer = get_shells
+    payload_arg.add_argument("--payload", required=False, help="Choose the payload").completer = get_shells
 
     # Available encodings
     encoders = parser.add_argument_group('Encoders Options')
