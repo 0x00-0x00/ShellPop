@@ -8,9 +8,14 @@
 
 -----
 ## Installation
-Python 2.x is required. 3.0+ version will not work.
+Python 2.x is required. 
+
+3.0+ version will not work.
 
 **Required Dependencies Install**
+```bash
+root@kali# apt-get install python-argcomplete -y
+```
 ```bash
 root@kali# pip install -r requirements.txt
 ```
@@ -18,6 +23,8 @@ root@kali# pip install -r requirements.txt
 ```bash
 root@kali# python setup.py install
 ```
+
+**PS**: After installation, tab auto-complete will only work after restarting the terminal.
 
 ## Index
 * [Help](#help-section)

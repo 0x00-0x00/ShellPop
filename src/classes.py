@@ -90,7 +90,7 @@ def base64_wrapper(name, code, args,shell="/bin/bash"):
 
 
 class Shell(object):
-    def __init__(self, name, shell_type, proto, code, os=None, arch=None, use_handler=None, use_http_stager=None):
+    def __init__(self, name, short_name, shell_type, proto, code, system=None, arch=None, use_handler=None, use_http_stager=None):
         """
         ShellCode object is responsible for holding information about
         the static characteristics and informations about this shell 
@@ -105,15 +105,19 @@ class Shell(object):
         self.type = shell_type
         self.proto = proto
         self.code = code
+        self.short_name = short_name if len(short_name) > 0 else "generic"
 
         # These are optional attributes;
-        self.os = "Unknown" if os is None else os
+        self.system_os = "unknown" if system is None else system
         self.arch = "Unknown" if arch is None else arch
         self.handler = None if use_handler is None else use_handler # this is going to be the handler function.
         self.handler_args = None # this is going to be set during execution.
 
         self.use_http_stager = False if use_http_stager is None else use_http_stager
         return
+    
+    def get_full_name(self):
+        return self.system_os + "/" + self.type + "/" + self.proto + "/" + self.short_name
     
     
 class ReverseShell(object):

