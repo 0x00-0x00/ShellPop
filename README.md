@@ -2,7 +2,7 @@
 ## About
     Pop shells like a master
     Shell pop is all about popping shells. With this tool you can
-    generate easy and sofisticated reverse or bind shell commands
+    generate easy and sophisticated reverse or bind shell commands
     to help you during penetration tests.
     Don't waste more time with .txt files storing your Reverse shells!
 
