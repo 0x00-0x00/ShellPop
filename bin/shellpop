@@ -15,7 +15,6 @@
 #   Github: https://github.com/touhidshaikh
 
 
-import urllib
 import pyperclip
 import os
 import netifaces
@@ -180,6 +179,16 @@ AVAILABLE_SHELLS = [
                 arch="x86 / x64",
                 use_handler=bind_tcp_handler,
                 use_http_stager=WINDOWS_STAGERS),
+
+            15: Shell("Windows Powershell Nishang TCP",
+                "powershell_nishang",
+                "bind",
+                "tcp",
+                BIND_POWERSHELL_NISHANG_TCP(),
+                system="windows",
+                arch="x86 / x64",
+                use_handler=bind_tcp_handler,
+                use_http_stager=WINDOWS_STAGERS)
         },
 
         # Reverse shell list
@@ -413,6 +422,17 @@ AVAILABLE_SHELLS = [
                 arch="x86 / x64",
                 use_handler=reverse_tcp_handler,
                 use_http_stager=WINDOWS_STAGERS),
+
+            24: Shell("Powershell Nishang TCP",
+                "powershell_nishang",
+                "reverse",
+                "tcp",
+                REVERSE_POWERSHELL_NISHANG_TCP(),
+                system="windows",
+                arch="x86 / x64",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=[(1,Powershell_HTTP_Stager)]),
+
         }
     ]
 
