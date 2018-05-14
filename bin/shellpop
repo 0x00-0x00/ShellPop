@@ -433,6 +433,15 @@ AVAILABLE_SHELLS = [
                 use_handler=reverse_tcp_handler,
                 use_http_stager=[(1,Powershell_HTTP_Stager)]),
 
+            25: Shell("Groovy TCP",
+                "groovy",
+                "reverse",
+                "tcp",
+                REVERSE_GROOVY_TCP(),
+                system="multi",
+                arch="Independent",
+                use_handler=reverse_tcp_handler,
+                use_http_stager=list(filter(lambda x: x[0] not in [1], WINDOWS_STAGERS))),
         }
     ]
 
