@@ -423,7 +423,7 @@ AVAILABLE_SHELLS = [
                 use_handler=reverse_tcp_handler,
                 use_http_stager=WINDOWS_STAGERS),
 
-            24: Shell("Powershell Nishang TCP",
+            24: Shell("Windows Powershell Nishang TCP",
                 "powershell_nishang",
                 "reverse",
                 "tcp",
@@ -433,7 +433,17 @@ AVAILABLE_SHELLS = [
                 use_handler=reverse_tcp_handler,
                 use_http_stager=[(1,Powershell_HTTP_Stager)]),
 
-            25: Shell("Groovy TCP",
+            25: Shell("Windows Powershell Nishang ICMP",
+                "powershell_nishang",
+                "reverse",
+                "icmp",
+                REVERSE_POWERSHELL_ICMP(),
+                system="windows",
+                arch="x86 / x64",
+                use_handler=None,
+                use_http_stager=[(1, Powershell_HTTP_Stager)]),
+
+            26: Shell("Groovy TCP",
                 "groovy",
                 "reverse",
                 "tcp",
@@ -455,7 +465,8 @@ def proto_colorize(shell_name):
     """
     proto_avail = [
             ("UDP", "94"), 
-            ("TCP", "93")] # available protocols to colorize.
+            ("TCP", "93"),
+            ("ICMP", "92"),] # available protocols to colorize.
     for proto in proto_avail:
         if proto[0] in shell_name:
             shell_name = shell_name.replace(proto[0], "\033[{0}m{1}\033[0m".format(proto[1], proto[0]))
