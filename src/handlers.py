@@ -155,7 +155,7 @@ class TCP_Handler(object):
         self.conn_info = conn_info
         self.bind = bind
         self.sock = None
-    
+
     @staticmethod
     def read_and_loop(sock):
         while True:
@@ -169,9 +169,25 @@ class TCP_Handler(object):
                 sock.close()
                 return 0
             except socket.error:
+                print(error("Exiting shell handler ...."))
                 sock.close()
                 return 0
-            
+
+    @staticmethod
+    def write_and_loop(sock):
+        while True:
+            try:
+                s = raw_input("")
+                if len(s) > 0:
+                    sock.send(s+"\n")
+                    if s.lower() == "exit":
+                        raise KeyboardInterrupt # we want exit!
+            except KeyboardInterrupt:
+                sock.close()
+                return 0
+            except:
+                pass
+
     def handle(self):
         sock = None
         self.sock = socket.socket()
@@ -181,10 +197,10 @@ class TCP_Handler(object):
 
             sock, addr = self.sock.accept()
             print(info("Connection inbound from {0}:{1}".format(addr[0], addr[1])))
-        else: # reverse shell.
+        else:  # reverse shell.
             print(info("Waiting up to 10 seconds to start establishing the connection ..."))
             sleep(10)
-            
+
             print(info("Connecting to remote endpoint ..."))
             n = 0
             while n < 10:
@@ -195,25 +211,19 @@ class TCP_Handler(object):
                     break
                 except socket.error:
                     print(error("Connection to remote endpoint could not be established."))
-                    n+=1
+                    n += 1
                     sleep(4.5)
-        
-        if sock is None: # we assume we have a connection by now.
+
+        if sock is None:  # we assume we have a connection by now.
             print(error("No connection socket to use."))
             exit(0)
         else:
             sock.settimeout(1.0)
-        
+
         t = Thread(target=self.read_and_loop, args=(sock,))
-        t.start() # start the read in loop.
-        while 1:
-            try:
-                s = raw_input("") # This is a block call.
-                sock.send(s+"\n")
-            except KeyboardInterrupt:
-                print(info("Interrupting handler ..."))
-                sock.close()
-                self.sock.close()
+        t.start()  # start the read in loop.
+        t2 = Thread(target=self.write_and_loop, args=(sock,))
+        t2.start()
         t.join()
 
 def reverse_tcp_handler(conn_info):
