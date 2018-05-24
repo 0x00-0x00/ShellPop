@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # Description:
 # ShellPop is program to aid penetration testers
 # generating quick and dirty reverse/bind shell 
@@ -11,7 +11,7 @@
 # ===================================================
 # LowFuel contributed to the project in 27/04/2018
 #   Github: https://github.com/SouAquele
-# Touhid Shaik joined the project in 29/04/2018
+# Touhid Shaikh joined the project in 29/04/2018
 #   Github: https://github.com/touhidshaikh
 
 
@@ -695,7 +695,14 @@ def main():
     
     if shell.handler is not None and args.handler is True:
         print(info("Starting shell handler ..."))
-        shell.handler(shell.handler_args)
+	try:
+        	shell.handler(shell.handler_args)
+	except KeyboardInterrupt:
+		print(info("Killing handler ..."))
+		sys.exit()
+	except IOError:
+		print(info("Port Already used by another Program or Something Wrong..."))
+		sys.exit()
     else:
         print(info("This shell DOES NOT have a handler set."))
     
