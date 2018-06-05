@@ -8,3 +8,5 @@ dist/*
 test/
 test/*
 .idea/*
+venv/*
+venv/

