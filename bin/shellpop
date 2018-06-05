@@ -578,6 +578,7 @@ def main():
     payload_arg.add_argument("--reverse", action="store_true",
                              help="Victim communicates back to the attacking machine.")
     payload_arg.add_argument("--bind", action="store_true", help="Open up a listener on the victim machine.")
+    payload_arg.add_argument("-M", "--meterpreter", action="store_true", help="Upgrades shell to a meterpreter session.")
     
     # Alternative way to select shell payloads, using auto-tab completion.
     payload_arg.add_argument("--payload", required=False, help="Choose the payload").completer = get_shells
@@ -672,7 +673,7 @@ def main():
             exit(1)
         shell = select_shell(args, "reverse", args.number)
         if shell.handler is not None:
-            shell.handler_args = ('0.0.0.0', args.port)
+            shell.handler_args = (args, shell)
     else:
         if not check_shell_number(args.number, reverse=False):
             print(error("Invalid bind shell number."))
@@ -684,7 +685,7 @@ def main():
         if args.handler is not False:
             if args.host is None:
                 args.host = raw_input("[\033[092m*\033[0m] Remote host IP address: ")
-            shell.handler_args = (args.host, args.port)
+            shell.handler_args = (args, shell)
 
     # This is the spot for stagers.
     # First, we need to detect if the operator
