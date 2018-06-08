@@ -221,7 +221,7 @@ class Generic(MetaHandler):
             f.write(self.generate_rc_content(meterpreter=meterpreter))
 
         # Execute our .rc file to open metasploit handler.
-        system(self._generate_execution_string())
+        system("""xterm  -fn "-misc-fixed-medium-r-normal--18-*-*-*-*-*-iso8859-15" +sb -geometry 100x25+0+0 -e """ + self._generate_execution_string())
 
 
 def get_shell_name(shell_obj):
