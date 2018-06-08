@@ -107,7 +107,7 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
     return code
 
 
-def base64_wrapper(name, code, args,shell="/bin/bash"):
+def base64_wrapper(name, code, args, shell="/bin/bash"):
     if args.shell is not "":
         shell = args.shell
     if args.base64 is True:
