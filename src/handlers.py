@@ -253,10 +253,10 @@ def bind_tcp_handler((args, shell)):
 # I am keeping these handlers because of @Lowfuel
 
 def bind_tcp_pty_handler((args, shell)):
-    handler = TCP_PTY_Handler((args.host, args.port), bind=True)
+    handler = TCP_PTY_Handler((args.host, args.port), bind=False)
     handler.handle()
 
 
 def reverse_tcp_pty_handler((args, shell)):
-    handler = TCP_PTY_Handler((args.host, args.port), bind=False)
+    handler = TCP_PTY_Handler((args.host, args.port), bind=True)
     handler.handle()
