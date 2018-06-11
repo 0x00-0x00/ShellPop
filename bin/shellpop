@@ -586,7 +586,7 @@ def main():
     payload_arg.add_argument("--reverse", action="store_true",
                              help="Victim communicates back to the attacking machine.")
     payload_arg.add_argument("--bind", action="store_true", help="Open up a listener on the victim machine.")
-    payload_arg.add_argument("-M", "--meterpreter", action="store_true", help="Upgrades shell to a meterpreter session.")
+    #payload_arg.add_argument("-M", "--meterpreter", action="store_true", help="Upgrades shell to a meterpreter session.")
     
     # Alternative way to select shell payloads, using auto-tab completion.
     payload_arg.add_argument("--payload", required=False, help="Choose the payload").completer = get_shells
