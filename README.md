@@ -15,7 +15,7 @@ Python 2.7 is required.
 
 **Required Dependencies Install**
 ```bash
-root@kali# apt-get install python-argcomplete -y
+root@kali# apt-get install python-argcomplete metasploit-framework -y
 ```
 ```bash
 root@kali# pip install -r requirements.txt
@@ -33,7 +33,7 @@ root@kali# python setup.py install
 * [Basics](#basics)
 * [Encoders](#encoders)
 * [Handlers](#handlers)
-* [Meterpreter Shells](#meterpreter-shells)
+* [Meterpreter Shells](#meterpreter-shells-new)
 * [Stagers](#stagers)
 * [Protocols](#protocols)
 * [Credits](#credits)
