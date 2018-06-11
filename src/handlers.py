@@ -147,7 +147,6 @@ class TCP_PTY_Handler(object):
         sock.close()
 
 
-
 def error(err):
     return "[\033[091m!\033[0m] Error: {0}".format(err)
 
@@ -212,7 +211,7 @@ class Generic(MetaHandler):
         #if meterpreter is True:  # Haha! Lets upgrade this!
         #    base_rc += "set AutoRunScript post/multi/manage/shell_to_meterpreter\n"
 
-        # After everything is set, we need to finish it with "run -j"
+        # After everything is set, we need to finish it with "run"
         base_rc += "run\n"
 
         return base_rc
@@ -248,13 +247,13 @@ def get_shell_name(shell_obj):
 def reverse_tcp_handler((args, shell)):
     shell_name = get_shell_name(shell)
     handler = Generic((args.host, args.port), shell_name, is_bind=False)
-    handler.generate_and_execute(meterpreter=args.meterpreter)
+    handler.generate_and_execute()
 
 
 def bind_tcp_handler((args, shell)):
     shell_name = get_shell_name(shell)
     handler = Generic((args.host, args.port), shell_name, is_bind=True)
-    handler.generate_and_execute(meterpreter=args.meterpreter)
+    handler.generate_and_execute()
 
 
 # I am keeping these handlers because of @Lowfuel
