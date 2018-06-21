@@ -1,6 +1,7 @@
 from urllib import quote
 from binascii import hexlify
 
+
 def to_urlencode(data):
     """
     URL-encode a byte stream, plus some other characters that
@@ -13,6 +14,7 @@ def to_urlencode(data):
         data = data.replace(each, "%" + hexlify(each))
     return data
 
+
 def to_unicode(data):
     """
     Get a string and make it Unicode
@@ -23,6 +25,7 @@ def to_unicode(data):
         out += char + "\x00"
     return out
 
+
 def powershell_base64(data, unicode_encoding=True):
     """
     Encode something compatible for Powershell base64-encoding
@@ -31,6 +34,7 @@ def powershell_base64(data, unicode_encoding=True):
     """
     data = to_unicode(data) if unicode_encoding is True else data
     return data.encode("base64").replace("\n", "")
+
 
 def xor(data, key):
     """

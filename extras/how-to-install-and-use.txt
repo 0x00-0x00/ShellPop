@@ -1,0 +1,26 @@
+#   How to install Shellpop shell_to_meterpreter module into metasploit-framework
+#   Obviously, you will need to have metasploit framework 4 installed in the
+system. If you are smart then you're using Kali already and dont need to worry
+with that.
+
+root@kali# mkdir -p ~/.msf4/modules/post/shellpop
+root@kali# cp extras/shell_to_meterpreter ~/.msf4/modules/post/shellpop
+
+#   Now boot metasploit-framework (msfconsole) and you will find the module in 
+
+post/shellpop/shell_to_meterpreter
+
+#   With a command shell open, you can CTRL+Z (background) the shell and do
+this procedure:
+
+use post/shellpop/shell_to_meterpreter
+set SESSION 1
+set IS_POWERSHELL true  # if it is a powershell shell
+run
+#   This should upgrade your shell to meterpreter.
+
+#   FAQ:
+#  1. Why dont you use default module shell_to_meterpreter?
+#  1A: It has some trouble into detecting PowerShell in some Windows Machines.
+I find that very annoying. So it was far more easier to just set a Boolean
+variable to skip PowerShell detection and just use it.

@@ -1,20 +1,20 @@
 # ShellPop
 ## About
-    Pop shells like a master
-    Shell pop is all about popping shells. With this tool you can
-    generate easy and sophisticated reverse or bind shell commands
-    to help you during penetration tests.
-    Don't waste more time with .txt files storing your Reverse shells!
 
+Shellpop is all about popping shells. With this tool you can
+generate easy and sofisticated reverse or bind shell commands
+to help you during penetration tests.
+
+Don't waste more time with .txt files storing your Reverse shells!
 -----
 ## Installation
-Python 2.x is required. 
+Python 2.7 is required. 
 
 3.0+ version will not work.
 
 **Required Dependencies Install**
 ```bash
-root@kali# apt-get install python-argcomplete -y
+root@kali# apt-get install python-argcomplete metasploit-framework -y
 ```
 ```bash
 root@kali# pip install -r requirements.txt
@@ -32,6 +32,7 @@ root@kali# python setup.py install
 * [Basics](#basics)
 * [Encoders](#encoders)
 * [Handlers](#handlers)
+* [Meterpreter Shells](#meterpreter-shells-new)
 * [Stagers](#stagers)
 * [Protocols](#protocols)
 * [Credits](#credits)
@@ -63,6 +64,11 @@ root@kali# shellpop --list
 
 ![ShellsList](img/img-shell-list.JPG?raw=true)
 
+##### Auto-Complete [NEW]
+
+Now shellpop has auto-complete feature. To use it, you need to forget about --number and (--reverse or --bind), just stick to --payload argument. Like the image below:
+
+![Autocomplete](img/img-shell-autocomplete.JPG?raw=true)
 
 ### __Basics__
 -----
@@ -132,11 +138,16 @@ Handler is a mechanism to "handle" the act of serving a socket to receive the in
 
 Currently there is support of the following TCP handlers:
 1. TCP PTY Handlers
-2. TCP Handlers
+2. TCP Meta-Handlers [NEW]
 
 This means every TCP shell can have appended to their command-line argument the `--handler` option. Removing the necessity of the operator to spawn the handler (probably ncat or nc) by himself.
 
 ![Screenshot](img/handler.gif?raw=true)
+
+### __Meterpreter Shells__ [NEW]
+This feature was widely asked by people who used this tool. Now it is technically possible to upgrade all shellpop shells to meterpreter, as since 0.3.6, handler uses by default the Metasploit Framework to land shells.
+
+![Meterpreter](img/handler-meterpreter.gif?raw=true)
 
 -----
 ### __Stagers__
@@ -161,6 +172,7 @@ Currently there is support of two protocols to land your shells:
 
 1. TCP
 2. UDP
+3. ICMP (Nishang ICMP shell)
 
 #### *Command line examples*
 ##### TCP is blocked but UDP is not? Let there be shell!
