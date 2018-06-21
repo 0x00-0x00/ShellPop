@@ -6,7 +6,6 @@ generate easy and sofisticated reverse or bind shell commands
 to help you during penetration tests.
 
 Don't waste more time with .txt files storing your Reverse shells!
-
 -----
 ## Installation
 Python 2.7 is required. 
