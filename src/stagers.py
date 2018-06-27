@@ -57,7 +57,7 @@ class Python_HTTP_Stager(HTTPStager):
     name = "Python HTTP Stager"
 
     def __init__(self, conn_info, args, filename):
-        HTTPStager.__init__()
+        HTTPStager.__init__(self)
         self.args = args
         self.host = conn_info[0]
         self.port = conn_info[1]
