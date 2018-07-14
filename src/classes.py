@@ -1,3 +1,4 @@
+from obfuscators import randomize_vars
 from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
 from binary import shellcode_to_hex, shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since 0.3.6
@@ -186,6 +187,9 @@ class ReverseShell(object):
             
             # Apply powershell-tuning if set in args.
             self.code = powershell_wrapper(self.name, self.code, self.args)
+
+            # Apply variable randomization
+            self.code = randomize_vars(self.code, self.args.obfuscate_small)
         else:
             # Custom shell. Here we need to program individually based in specifics.
             # TODO: I need to separate this into a custom file.
@@ -245,6 +249,9 @@ class BindShell(object):
 
         # Apply powershell-tuning if set in args.
         self.code = powershell_wrapper(self.name, self.code, self.args)
+
+        # Apply variable randomization
+        self.code = randomize_vars(self.code, self.args.obfuscate_small)
 
         # Apply xor encoding.
         self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)

