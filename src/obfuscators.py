@@ -76,22 +76,31 @@ def random_base_ip_gen(parts, smallIP):
 		octParts.append(oct(int(i)))
 
     randBaseIP = ""
-    for i in range(0,4):
-        val = ord(os.urandom(1)) % 3
-        if val == 0:
-            # dec
-            randBaseIP += parts[i] + '.'
-        elif val == 1:
-            # hex
-            if not smallIP:
-                randBaseIP += hexParts[i].replace('0x', '0x' + '0' * (ord(os.urandom(1)) % 31)) + '.'
+    baseChoices = []
+    ip_obfuscated = False
+    while not ip_obfuscated:
+        for i in range(0,4):
+            val = ord(os.urandom(1)) % 3
+            baseChoices.append(val)
+            if val == 0:
+                # dec
+                randBaseIP += parts[i] + '.'
+            elif val == 1:
+                # hex
+                if not smallIP:
+                    randBaseIP += hexParts[i].replace('0x', '0x' + '0' * (ord(os.urandom(1)) % 31)) + '.'
+                else:
+                    randBaseIP += hexParts[i] + '.'
             else:
-                randBaseIP += hexParts[i] + '.'
+                # oct
+                if not smallIP:
+                    randBaseIP += '0' * (ord(os.urandom(1)) % 31) + octParts[i] + '.'
+                else:
+                    randBaseIP += octParts[i] + '.'
+
+        if sum(baseChoices) > 0:
+            ip_obfuscated = True
         else:
-            # oct
-            if not smallIP:
-                randBaseIP += '0' * (ord(os.urandom(1)) % 31) + octParts[i] + '.'
-            else:
-                randBaseIP += octParts[i] + '.'
+            baseChoices.clear()
 
     return randBaseIP[:-1]
