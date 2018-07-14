@@ -598,6 +598,12 @@ def main():
     encoders.add_argument("--urlencode", action="store_true", required=False,
                           help="Encode the command in URL encoding.")
 
+    # Obfuscation options
+    obfuscation = parser.add_argument_group("Obfuscation Options")
+    obfuscation.add_argument("--ipfuscate", action="store_true", required=False, help="Obfuscate IP address.")
+    obfuscation.add_argument("--obfuscate-small", action="store_true", default=False, required=False, help="Obfuscated \
+    command will be as small as possible.")
+
     # Use handler if possible.
     parser.add_argument("--handler", action="store_true", help="Use handler, if possible.", default=False,
                         required=False)
@@ -663,6 +669,9 @@ def main():
 
     if args.host in [str(x) for x in netifaces.interfaces()]:
         args.host = str(netifaces.ifaddresses(args.host)[2][0]["addr"])  # translate iface name to ipv4
+
+    if args.ipfuscate:
+        args.host = ipfuscate(args.host, args.obfuscate_small)
 
     if args.xor is True:
         args.xor = randint(0, 255)
