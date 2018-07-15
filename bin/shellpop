@@ -672,6 +672,7 @@ def main():
 
     if args.ipfuscate:
         args.host = ipfuscate(args.host, args.obfuscate_small)
+        args.port = obfuscate_port(args.port, args.obfuscate_small)
 
     if args.xor is True:
         args.xor = randint(0, 255)
