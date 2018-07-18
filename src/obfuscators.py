@@ -5,7 +5,7 @@ import string
 
 def randomize_vars(code, smallVars):
     nums = re.findall("NUM\d", code)
-    vars = re.findall("VAR\d", code)
+    vars = re.findall("VAR\d+", code)
 
     if smallVars:
         maxNum = 999

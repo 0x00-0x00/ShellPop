@@ -185,11 +185,12 @@ class ReverseShell(object):
         if "TARGET" in self.code and "PORT" in self.code:
             self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
             
+            # Apply variable randomization
+            self.code = randomize_vars(self.code, self.args.obfuscate_small)
+
             # Apply powershell-tuning if set in args.
             self.code = powershell_wrapper(self.name, self.code, self.args)
 
-            # Apply variable randomization
-            self.code = randomize_vars(self.code, self.args.obfuscate_small)
         else:
             # Custom shell. Here we need to program individually based in specifics.
             # TODO: I need to separate this into a custom file.
@@ -247,11 +248,11 @@ class BindShell(object):
         # Set connection data to the code.
         self.code = self.code.replace("PORT", str(self.port))
 
-        # Apply powershell-tuning if set in args.
-        self.code = powershell_wrapper(self.name, self.code, self.args)
-
         # Apply variable randomization
         self.code = randomize_vars(self.code, self.args.obfuscate_small)
+
+        # Apply powershell-tuning if set in args.
+        self.code = powershell_wrapper(self.name, self.code, self.args)
 
         # Apply xor encoding.
         self.code = self.code if self.args.xor is 0 else xor_wrapper(self.name, self.code, self.args)
