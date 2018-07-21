@@ -70,7 +70,6 @@ def random_base_ip_gen(parts, smallIP):
     Code borrowed from @vysecurity (https://github.com/vysec/IPFuscator)
     Implemented by @capnspacehook
     """
-    
     hexParts = []
     octParts = []
 
@@ -102,80 +101,137 @@ def random_base_ip_gen(parts, smallIP):
                     randBaseIP += octParts[i] + '.'
 
         # Check to make sure all four parts of IP aren't decimal... in which case nothing would have changed
-        if sum(baseChoices) > 0:
+        if sum(baseChoices) > 4:
             ip_obfuscated = True
         else:
-            baseChoices.clear()
+            randBaseIP = ""
+            del baseChoices[:]
 
     return randBaseIP[:-1]
 
-def obfuscate_port(port, smallPort):
+def obfuscate_port(port, smallExpr):
     """
     Obfuscate a port number by replacing the single int
     with an arithmetic expression. Returns a string that
     when evaluated mathmatically, is equal to the port entered.
     @capnspacehook 
     """
-    modPieces = gen_mod_expr(port)
+    exprStr, baseExprPieces = gen_simple_expr(port, smallExpr)
 
-    if smallPort:
-        return "(%s*%s+%s)" % (modPieces[0], modPieces[1], modPieces[2])
+    if smallExpr:
+        portExpr = exprStr % (baseExprPieces[0], baseExprPieces[1], baseExprPieces[2])
     else:
-        portStr = ""
-        portStrPieces = []
-        for part in modPieces:
-            if part != 0:
-                choice = ord(os.urandom(1)) % 2
-                if choice:
-                    portStrPieces.append(gen_simple_expr(part))
-                else:
-                    part = gen_mod_expr(part)
-                    portStrPieces.append("(%s*%s+%s)" % (part[0], part[1], part[2]))
-            else:
-                portStrPieces.append("0")
+        subExprs = []
+        for piece in baseExprPieces:
+            expr, pieces = gen_simple_expr(piece, smallExpr)
+            subExprs.append(expr % (pieces[0], pieces[1], pieces[2]))
 
-        return "(%s*%s+%s)" % (portStrPieces[0], portStrPieces[1], portStrPieces[2])
-                
-            
-def gen_mod_expr(n):
-    if n == 1:
-        right = n
-    else:
-        right = random.randint(1, int(n / 2))
-    left = int(n / right)
-    remainder = n % right    
+        portExpr = exprStr % (subExprs[0], subExprs[1], subExprs[2])
+        
+    # Randomly replace '+' with '--'. Same thing, more confusing
+    match = re.search("\+\d+", portExpr)
+    beginingExprLen = 0
+    while match is not None:   
+        match = list(match.span())
+        match[0] += beginingExprLen
+        match[1] += beginingExprLen
+        choice = ord(os.urandom(1)) % 2
+
+        if choice:
+            portExpr = portExpr[:match[0]] + "-(-" + portExpr[match[0] + 1:match[1]] + ")" + portExpr[match[1]:]
+
+        beginingExprLen = len(portExpr[:match[1]])
+        match = re.search("\+\d+", portExpr[match[1]:])
     
-    return (left, right, remainder)
+    # Properly separate any double '-' signs. Some langs complain
+    match = re.search("--\d+", portExpr)
+    beginingExprLen = 0
+    while match is not None:   
+        match = list(match.span())
+        match[0] += beginingExprLen
+        match[1] += beginingExprLen
 
-def gen_simple_expr(n):
+        portExpr = portExpr[:match[0]] + "-(" + portExpr[match[0] + 1:match[1]] + ")" + portExpr[match[1]:]
+
+        beginingExprLen = len(portExpr[:match[1]])
+        match = re.search("--\d+", portExpr[match[1]:])
+        
+    return portExpr
+
+
+def gen_simple_expr(n, smallExpr):
+    """
+    Generates a simple mathmatical expression of 3 terms
+    that equal the number passed. Returns a template
+    expression string, and a tuple of the values of the 
+    terms in the generated expression.
+    @capnspacehook
+    """
+    if type(n) == str:
+        n = int(eval(n))
+
+    if n == 0:
+        N = 0
+        while N == 0:
+            N = random.randint(-99999, 99999)
+    else:
+        N = n
+
     choice = ord(os.urandom(1)) % 3
     left = 0
     if choice == 0:
-        left = random.randint(-n * 2, n - 1)
-        right = random.randint(-n + 1, n * 2)
+        if N < 0:
+            left = random.randint(N * 2, -N + 1)
+            right = random.randint(N - 1, -N * 2)
+        else:
+            left = random.randint(-N * 2, N - 1)
+            right = random.randint(-N + 1, N * 2)
+
         if left + right < n:
             offset = n - (left + right)
-            expr = "(%s+%s)--%s" % (left, right, offset)
+            expr = "((%s+%s)+%s)"
         else:
             offset = (left + right) - n
-            expr = "((%s+%s)-%s)" % (left, right, offset)
+            expr = "(-(-(%s+%s)+%s))"
     elif choice == 1:
-        left = random.randint(-n + 1, n * 2)
-        right = random.randint(-n * 2, n + 1)
+        if N < 0:
+            left = random.randint(N - 1, -N * 2)
+            right = random.randint(N * 2, N - 1)
+        else:
+            left = random.randint(-N + 1, N * 2)
+            right = random.randint(-N * 2, N + 1)
+
         if left - right < n:
             offset = n - (left - right)
-            expr = "((%s-%s)--%s)" % (left, right, offset)
+            expr = "((%s-%s)+%s)"
         else:
             offset = (left - right) - n
-            expr = "((%s-%s)-%s)" % (left, right, offset)
+            expr = "(-(-(%s-%s)+%s))"
     elif choice == 2:
-        left = random.randint(2, int(n / 2) + 2)
-        right = random.randint(int(n / 5), int(n / 3))
+        if N < 0:
+            left = random.randint(int(N / 2), -int(N / 2) - 2)
+            right = random.randint(int(N / 3), -int(N / 3))
+        else:
+            left = random.randint(-int(n / 2), int(n / 2) + 2)
+            right = random.randint(-int(n / 3), int(n / 3))
+
         if left * right < n:
             offset = n - (left * right)
-            expr = "((%s*%s)--%s)" % (left, right, offset)
+            expr = "((%s*%s)+%s)"
         else:
             offset = (left * right) - n
-            expr = "((%s*%s)-%s)" % (left, right, offset)
+            expr = "(-(-(%s*%s)+%s))"
 
-    return expr
+    # Replace all zeros with an expression. Zeros make arithemetic easy
+    if not smallExpr:
+        if left == 0:
+            zeroExpr, terms = gen_simple_expr(0, smallExpr)
+            left = zeroExpr % (terms[0], terms[1], terms[2])
+        if right == 0:
+            zeroExpr, terms = gen_simple_expr(0, smallExpr)
+            right = zeroExpr % (terms[0], terms[1], terms[2])
+        if offset == 0:
+            zeroExpr, terms = gen_simple_expr(0, smallExpr)
+            offset = zeroExpr % (terms[0], terms[1], terms[2])
+
+    return (expr, (left, right, offset))
