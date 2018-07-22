@@ -594,6 +594,7 @@ def main():
     # Available encodings
     encoders = parser.add_argument_group('Encoders Options')
     encoders.add_argument("--xor", action="store_true",help="Enable XOR obfuscation", required=False)
+    encoders.add_argument("--gzip", action="store_true",help="Compress the payload with gzip.", required=False)
     encoders.add_argument("--base64", action="store_true", required=False, help="Encode command in base64.")
     encoders.add_argument("--urlencode", action="store_true", required=False,
                           help="Encode the command in URL encoding.")
@@ -678,6 +679,9 @@ def main():
         args.xor = randint(0, 255)
     else:
         args.xor = 0  # no Xor encoding!
+
+    if args.gzip is True and args.base64 is True:
+        print(info("The --gzip option automatically base64 encodes the payload, --base64 is unnessesary."))
 
     if args.reverse is True:
         if not check_shell_number(args.number, reverse=True):
@@ -765,6 +769,7 @@ def main():
         print(info("ShellPop code has been copied to clipboard."))
 
     print(info("Execute this code in remote target: \n\n{0}\n".format(to_be_executed)))
+    print(info("Payload size: {0} characters.".format(len(to_be_executed))))
     
     if shell.handler is not None and args.handler is True:
         print(info("Starting shell handler ..."))

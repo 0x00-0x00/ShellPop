@@ -1,5 +1,7 @@
 from urllib import quote
 from binascii import hexlify
+import gzip 
+import StringIO
 
 
 def to_urlencode(data):
@@ -49,3 +51,14 @@ def xor(data, key):
         output += chr(ord(data[index]) ^ key)
     return output
 
+
+def gzip_compress(data):
+    fgz = StringIO.StringIO()
+    gzip_obj = gzip.GzipFile(mode='wb', fileobj=fgz)
+    gzip_obj.write(data)
+    gzip_obj.close()
+    
+    gzip_payload = fgz.getvalue()
+    fgz.close()
+
+    return gzip_payload
