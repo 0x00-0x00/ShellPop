@@ -3,7 +3,7 @@ import random
 import re
 import string
 
-def randomize_vars(code, smallVars):
+def randomize_vars(code, smallVars, lang=""):
     nums = re.findall("NUM\d", code)
     vars = re.findall("VAR\d+", code)
 
@@ -16,11 +16,11 @@ def randomize_vars(code, smallVars):
         code = code.replace(num, str(random.randint(0, maxNum)))
 
     for var in vars:
-        code = code.replace(var, gen_random_var(smallVars))
+        code = code.replace(var, gen_random_var(smallVars, lang))
 
     return code
 
-def gen_random_var(smallVars):
+def gen_random_var(smallVars, lang):
     if smallVars:
         minVarLen = 3
         maxVarLen = 6
@@ -33,6 +33,10 @@ def gen_random_var(smallVars):
         randVarLen = ord(os.urandom(1)) % (maxVarLen + 1)
 
     randomVar = "".join(string.ascii_letters[ord(os.urandom(1)) % 52] for x in range(randVarLen))
+
+    # Ruby requires that variables start with a lowercase letter
+    if lang == "ruby":
+        randomVar =  randomVar[0].lower() + randomVar[1:]
 
     return randomVar
     
@@ -109,7 +113,7 @@ def random_base_ip_gen(parts, smallIP):
 
     return randBaseIP[:-1]
 
-def obfuscate_port(port, smallExpr):
+def obfuscate_port(port, smallExpr, lang):
     """
     Obfuscate a port number by replacing the single int
     with an arithmetic expression. Returns a string that
@@ -155,7 +159,11 @@ def obfuscate_port(port, smallExpr):
 
         beginingExprLen = len(portExpr[:match[1]])
         match = re.search("--\d+", portExpr[match[1]:])
-        
+    
+    # Bash requires mathmatical expressions to be in $((expr)) syntax
+    if lang == "bash":
+        portExpr = "$((" + portExpr + "))"
+
     return portExpr
 
 
