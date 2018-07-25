@@ -120,8 +120,8 @@ Here the IP address in the generated payload is a combination of different numbe
 The port is obfuscated by replacing 443 with an expression that evaluates to 443. This expression is generated randomly as well.
 
 ---
-
-Although IPfuscation is optional, random variable obfuscation is now automatically enforced on all payloads. If the size of the payload is a real concern, you can pass the `--obfuscate-small` option to have the payload be minimally increased in size by obfuscation.
+#### Size Concerns
+Although IPfuscation is optional, random variable obfuscation is now automatically enforced on all payloads. If the size of the payload is a real concern, you can pass the `--obfuscate-small` option to have the payload be minimally increased in size by obfuscation. The variable names, IP address and port number will be significantly shorter when used with this option.
 
 ![Screenshot](img/img-small-obfuscation.JPG?raw=true)
 
