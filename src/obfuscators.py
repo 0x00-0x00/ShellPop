@@ -4,6 +4,16 @@ import re
 import string
 
 def randomize_vars(code, smallVars, lang=""):
+    """
+    Parses 'code' as a string, and replaces all arbitrary
+    numbers with random ones, and randomly names variables. 
+    Accounts for quirks in certain languages that enforce
+    nonstandard variable naming rules, and ensures no two 
+    variables have the same name in a given payload.
+    @capnspacehook
+    """
+    randGen = random.SystemRandom()
+
     nums = re.findall("NUM\d", code)
     vars = re.findall("VAR\d+", code)
 
@@ -12,27 +22,43 @@ def randomize_vars(code, smallVars, lang=""):
     else:
         maxNum = 9999999
 
+    randNums = []
     for num in nums:
-        code = code.replace(num, str(random.randint(0, maxNum)))
+        randNum = randGen.randint(1, maxNum)
+        while randNum in randNums:
+            randNum = gen_random_num(1, maxNum)
+        
+        code = code.replace(num, str(randGen.randint(0, maxNum)))
+        randNums.append(randNum)
 
+    randVars = []
     for var in vars:
-        code = code.replace(var, gen_random_var(smallVars, lang))
+        randVar = gen_random_var(smallVars, lang)
+        while randVar in randVars:
+            randVar = gen_random_var(smallVars, lang)
+        
+        code = code.replace(var, randVar)
+        randVars.append(randVar)
 
     return code
 
+
 def gen_random_var(smallVars, lang):
+    """
+    Returns a randomly named variable.
+    @capnspacehook
+    """
+    randGen = random.SystemRandom()
+
     if smallVars:
         minVarLen = 3
         maxVarLen = 6
     else:
         minVarLen = 6
         maxVarLen = 15
-
-    randVarLen = 0
-    while randVarLen < minVarLen:
-        randVarLen = ord(os.urandom(1)) % (maxVarLen + 1)
-
-    randomVar = "".join(string.ascii_letters[ord(os.urandom(1)) % 52] for x in range(randVarLen))
+    
+    randVarLen = randGen.randint(minVarLen, maxVarLen)
+    randomVar = "".join(randGen.choice(string.ascii_letters) for x in range(randVarLen))
 
     # Ruby requires that variables start with a lowercase letter
     if lang == "ruby":
@@ -48,13 +74,15 @@ def ipfuscate(ip, smallIP):
     Code borrowed from @vysecurity (https://github.com/vysec/IPFuscator)
     Implemented by @capnspacehook
     """
+    randGen = random.SystemRandom()
+
     parts = ip.split('.')
 
     if not smallIP:
         ip = random_base_ip_gen(parts, smallIP)
         
     else:
-        type = ord(os.urandom(1)) % 4
+        type = randGen.randint(0, 3)
         decimal = int(parts[0]) * 16777216 + int(parts[1]) * 65536 + int(parts[2]) * 256 + int(parts[3])
 
         if type == 0:
@@ -68,12 +96,15 @@ def ipfuscate(ip, smallIP):
 
     return str(ip)
 
+
 def random_base_ip_gen(parts, smallIP):
     """
     Used by ipfuscate(), returns an obfuscated IP with random bases.
     Code borrowed from @vysecurity (https://github.com/vysec/IPFuscator)
     Implemented by @capnspacehook
     """
+    randGen = random.SystemRandom()
+
     hexParts = []
     octParts = []
 
@@ -86,7 +117,7 @@ def random_base_ip_gen(parts, smallIP):
     ip_obfuscated = False
     while not ip_obfuscated:
         for i in range(0,4):
-            val = ord(os.urandom(1)) % 3
+            val = randGen.randint(0, 2)
             baseChoices.append(val)
             if val == 0:
                 # dec
@@ -113,13 +144,16 @@ def random_base_ip_gen(parts, smallIP):
 
     return randBaseIP[:-1]
 
+
 def obfuscate_port(port, smallExpr, lang):
     """
     Obfuscate a port number by replacing the single int
     with an arithmetic expression. Returns a string that
-    when evaluated mathmatically, is equal to the port entered.
+    when evaluated mathematically, is equal to the port entered.
     @capnspacehook 
     """
+    randGen = random.SystemRandom()
+
     exprStr, baseExprPieces = gen_simple_expr(port, smallExpr)
 
     if smallExpr:
@@ -139,7 +173,7 @@ def obfuscate_port(port, smallExpr, lang):
         match = list(match.span())
         match[0] += beginingExprLen
         match[1] += beginingExprLen
-        choice = ord(os.urandom(1)) % 2
+        choice = randGen.randint(0, 1)
 
         if choice:
             portExpr = portExpr[:match[0]] + "-(-" + portExpr[match[0] + 1:match[1]] + ")" + portExpr[match[1]:]
@@ -160,7 +194,7 @@ def obfuscate_port(port, smallExpr, lang):
         beginingExprLen = len(portExpr[:match[1]])
         match = re.search("--\d+", portExpr[match[1]:])
     
-    # Bash requires mathmatical expressions to be in $((expr)) syntax
+    # Bash requires mathematical expressions to be in $((expr)) syntax
     if lang == "bash":
         portExpr = "$((" + portExpr + "))"
 
@@ -169,31 +203,33 @@ def obfuscate_port(port, smallExpr, lang):
 
 def gen_simple_expr(n, smallExpr):
     """
-    Generates a simple mathmatical expression of 3 terms
+    Generates a simple mathematical expression of 3 terms
     that equal the number passed. Returns a template
     expression string, and a tuple of the values of the 
     terms in the generated expression.
     @capnspacehook
     """
+    randGen = random.SystemRandom()
+
     if type(n) == str:
         n = int(eval(n))
 
     if n == 0:
         N = 0
         while N == 0:
-            N = random.randint(-99999, 99999)
+            N = randGen.randint(-99999, 99999)
     else:
         N = n
 
-    choice = ord(os.urandom(1)) % 3
+    choice = randGen.randint(0, 2)
     left = 0
     if choice == 0:
         if N < 0:
-            left = random.randint(N * 2, -N + 1)
-            right = random.randint(N - 1, -N * 2)
+            left = randGen.randint(N * 2, -N + 1)
+            right = randGen.randint(N - 1, -N * 2)
         else:
-            left = random.randint(-N * 2, N - 1)
-            right = random.randint(-N + 1, N * 2)
+            left = randGen.randint(-N * 2, N - 1)
+            right = randGen.randint(-N + 1, N * 2)
 
         if left + right < n:
             offset = n - (left + right)
@@ -203,11 +239,11 @@ def gen_simple_expr(n, smallExpr):
             expr = "(-(-(%s+%s)+%s))"
     elif choice == 1:
         if N < 0:
-            left = random.randint(N - 1, -N * 2)
-            right = random.randint(N * 2, N - 1)
+            left = randGen.randint(N - 1, -N * 2)
+            right = randGen.randint(N * 2, N - 1)
         else:
-            left = random.randint(-N + 1, N * 2)
-            right = random.randint(-N * 2, N + 1)
+            left = randGen.randint(-N + 1, N * 2)
+            right = randGen.randint(-N * 2, N + 1)
 
         if left - right < n:
             offset = n - (left - right)
@@ -217,11 +253,11 @@ def gen_simple_expr(n, smallExpr):
             expr = "(-(-(%s-%s)+%s))"
     elif choice == 2:
         if N < 0:
-            left = random.randint(int(N / 2), -int(N / 2) - 2)
-            right = random.randint(int(N / 3), -int(N / 3))
+            left = randGen.randint(int(N / 2), -int(N / 2) - 2)
+            right = randGen.randint(int(N / 3), -int(N / 3))
         else:
-            left = random.randint(-int(n / 2), int(n / 2) + 2)
-            right = random.randint(-int(n / 3), int(n / 3))
+            left = randGen.randint(-int(n / 2), int(n / 2) + 2)
+            right = randGen.randint(-int(n / 3), int(n / 3))
 
         if left * right < n:
             offset = n - (left * right)
