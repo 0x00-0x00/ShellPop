@@ -2,7 +2,7 @@
 ## About
 
 Shellpop is all about popping shells. With this tool you can
-generate easy and sofisticated reverse or bind shell commands
+generate easy and sophisticated reverse or bind shell commands
 to help you during penetration tests.
 
 Don't waste more time with .txt files storing your Reverse shells!
@@ -30,6 +30,7 @@ root@kali# python setup.py install
 * [Help](#help-section)
 * [List](#shells-list)
 * [Basics](#basics)
+* [Obfuscation](#obfuscation)
 * [Encoders](#encoders)
 * [Handlers](#handlers)
 * [Meterpreter Shells](#meterpreter-shells-new)
@@ -93,6 +94,36 @@ Bind shells use the remote host to serve the connection. In this type of payload
 
 ##### Generating a Powershell TCP bind shell over port 1337
 ![Screenshot](img/img-shell-example-02.JPG?raw=true)
+
+---
+### __Obfuscation__
+There are currently two main methods of obfuscation available for your generated payloads:
+
+1. *Variable renaming obfuscation*
+
+__Replaces all variables in payload with randomly named ones. Applied to every payload automatically.__
+
+![Screenshot](img/img-random-variables.JPG?raw=true)
+
+2. *IPfuscation*
+
+__Obfuscate the IP addresse and port used by the payload__
+
+Coined by @vysecurity, IPfuscation is simply leveraging the little known fact that IP addresses can be converted to decimal, octal, and hexadecimal numbers, or a combination of all three, and still be used.
+
+Port obfuscation is accomplished by replacing the port number with a mathematical expression that evaluates to the port number.
+
+![Screenshot](img/img-ipfuscation-example.JPG?raw=true)
+
+Here the IP address in the generated payload is a combination of different number bases. The first part in normal decimal notation, the second and third parts are 2 and 3 converted to octal with random zeros as padding, and the fourth part is 4 in hex, with some zeros as padding also. The selection of bases to use in each part of the IP address is randomized, as well as the number of zeros used as padding to hex and octal numbers.
+
+The port is obfuscated by replacing 443 with an expression that evaluates to 443. This expression is generated randomly as well.
+
+---
+
+Although IPfuscation is optional, random variable obfuscation is now automatically enforced on all payloads. If the size of the payload is a real concern, you can pass the `--obfuscate-small` option to have the payload be minimally increased in size by obfuscation.
+
+![Screenshot](img/img-small-obfuscation.JPG?raw=true)
 
 -----
 ### __Encoders__
@@ -194,4 +225,4 @@ Any damage caused by this tool don't make any contributor, including the author,
 + Rοbеrt Εѕрі ([lowfuel](https://github.com/SouAquele))
 -----
 ### __Contributors__
-We really appriciate all Contributors.
+We really appreciate all Contributors.
