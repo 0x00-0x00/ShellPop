@@ -183,7 +183,7 @@ class ReverseShell(object):
         Apply encoding, in the correct order, of course.
         """
         # Obfuscate IP and port if set in args
-        if self.args.ipfuscate:
+        if self.args.ipfuscate and self.lang != "powershell":  # Windows shells doesn't support ipfuscation
             self.host = ipfuscate(self.host, self.args.obfuscate_small)
             self.port = obfuscate_port(self.port, self.args.obfuscate_small, self.lang)
 
