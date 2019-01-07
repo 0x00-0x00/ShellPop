@@ -48,14 +48,14 @@ setup(name='shellpop',
       author_email='andre.marques@fatec.sp.gov.br',
       license='MIT',
       packages=['shellpop'],
-      package_dir={"shellpop": "src"},
+      package_dir={"shellpop": "shellpop"},
       package_data={
-          "shellpop": ["src/*"],
+          "shellpop": ["shellpop/*"],
       },
 
         # No data files yet.
       #data_files=[
-      #    ('shellpop', ['src/agent_list.json']),
+      #    ('shellpop', ['shellpop/agent_list.json']),
       #],
 
       scripts=["bin/shellpop"],
