@@ -808,14 +808,14 @@ def main():
     
     if shell.handler is not None and args.handler is True:
         print(info("Starting shell handler ..."))
-	try:
-        	shell.handler(shell.handler_args)
-	except KeyboardInterrupt:
-		print(info("Killing handler ..."))
-		sys.exit()
-	except IOError:
-		print(info("Port Already used by another Program or Something Wrong..."))
-		sys.exit()
+        try:
+            shell.handler(shell.handler_args)
+        except KeyboardInterrupt:
+            print(info("Killing handler ..."))
+            sys.exit()
+        except IOError:
+            print(info("Port Already used by another Program or Something Wrong..."))
+            sys.exit()
     else:
         print(info("This shell DOES NOT have a handler set."))
     
